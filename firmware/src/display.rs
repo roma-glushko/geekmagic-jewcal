@@ -79,11 +79,8 @@ impl<'d> Display<'d> {
             &SpiConfig::new().baudrate(40.MHz().into()).data_mode(MODE_3),
         )?;
 
-        let mut disp = Self {
-            spi,
-            dc: dc_pin,
-            band: vec![0u8; BAND_BYTES].into_boxed_slice().try_into().expect("band size"),
-        };
+        let mut disp =
+            Self { spi, dc: dc_pin, band: vec![0u8; BAND_BYTES].into_boxed_slice().try_into().expect("band size") };
         disp.init()?;
         Ok(disp)
     }

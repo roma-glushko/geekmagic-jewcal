@@ -30,7 +30,11 @@ impl std::fmt::Display for RateLimited {
 impl std::error::Error for RateLimited {}
 
 /// GET `url` and pass at most `max_bytes` of the body to `f`.
-pub fn get<T>(url: &str, max_bytes: usize, f: impl FnOnce(&mut dyn io::Read) -> anyhow::Result<T>) -> anyhow::Result<T> {
+pub fn get<T>(
+    url: &str,
+    max_bytes: usize,
+    f: impl FnOnce(&mut dyn io::Read) -> anyhow::Result<T>,
+) -> anyhow::Result<T> {
     let _tls = TLS.lock().unwrap_or_else(|e| e.into_inner());
     let conn = EspHttpConnection::new(&HttpConfig {
         use_global_ca_store: true,
@@ -70,10 +74,7 @@ impl<R: embedded_svc::io::Read> io::Read for Body<'_, R> {
             return Err(io::Error::other("response larger than expected"));
         }
         let n = buf.len().min(self.left);
-        let got = self
-            .inner
-            .read(&mut buf[..n])
-            .map_err(|e| io::Error::other(format!("read: {e:?}")))?;
+        let got = self.inner.read(&mut buf[..n]).map_err(|e| io::Error::other(format!("read: {e:?}")))?;
         self.left -= got;
         Ok(got)
     }

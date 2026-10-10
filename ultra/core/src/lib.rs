@@ -8,8 +8,21 @@
 //! Everything runs on the Arduino `loop()` task, one call at a time.
 //! Strings cross as NUL-terminated UTF-8; pages are written through a sink
 //! callback in small chunks, never as one big buffer.
+//!
+//! # Safety
+//!
+//! Every `jc_*` function shares one contract with the C++ caller:
+//! - it is called from the Arduino loop task only, never from an interrupt,
+//!   never while another `jc_*` call is running, and after `jc_init`;
+//! - pointer arguments are either NULL or valid for the stated length, and
+//!   C strings are NUL-terminated;
+//! - output buffers hold at least the capacity passed with them (the fixed
+//!   ones as documented: 120 bytes for `jc_row`, 16 colors for `jc_lut`,
+//!   33 and 65 bytes for the SSID and password of `jc_wifi_form`).
 
 #![no_std]
+// The contract above applies to every exported function.
+#![allow(clippy::missing_safety_doc)]
 
 extern crate alloc;
 
@@ -418,7 +431,12 @@ pub unsafe extern "C" fn jc_form_add(name: *const c_char, value: *const c_char) 
 /// Apply the collected settings form and write the resulting page. Returns
 /// true when the settings changed (save them).
 #[no_mangle]
-pub unsafe extern "C" fn jc_form_apply(sink: Sink, ctx: *mut c_void, info: *const c_char, token: *const c_char) -> bool {
+pub unsafe extern "C" fn jc_form_apply(
+    sink: Sink,
+    ctx: *mut c_void,
+    info: *const c_char,
+    token: *const c_char,
+) -> bool {
     let core = core_mut();
     let form = core::mem::take(&mut core.form);
     let field = |k: &str| form.iter().find(|(name, _)| name == k).map(|(_, v)| v.clone());

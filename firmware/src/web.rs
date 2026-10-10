@@ -21,17 +21,13 @@ const STACK: usize = 12_288;
 const MAX_BODY: usize = 2048;
 
 pub fn start(sh: Arc<Shared>) -> anyhow::Result<EspHttpServer<'static>> {
-    let mut server = EspHttpServer::new(&HttpServerConfig {
-        stack_size: STACK,
-        max_uri_handlers: 8,
-        ..Default::default()
-    })?;
+    let mut server =
+        EspHttpServer::new(&HttpServerConfig { stack_size: STACK, max_uri_handlers: 8, ..Default::default() })?;
 
     let s = sh.clone();
     server.fn_handler("/", Method::Get, move |req| -> anyhow::Result<()> {
         let page = settings_page(&s, "");
-        req.into_response(200, None, &[("Content-Type", "text/html; charset=utf-8")])?
-            .write_all(page.as_bytes())?;
+        req.into_response(200, None, &[("Content-Type", "text/html; charset=utf-8")])?.write_all(page.as_bytes())?;
         Ok(())
     })?;
 
@@ -40,8 +36,7 @@ pub fn start(sh: Arc<Shared>) -> anyhow::Result<EspHttpServer<'static>> {
         let body = read_body(&mut req);
         let notice = web::save_notice(&apply_form(&s, &body));
         let page = settings_page(&s, &notice);
-        req.into_response(200, None, &[("Content-Type", "text/html; charset=utf-8")])?
-            .write_all(page.as_bytes())?;
+        req.into_response(200, None, &[("Content-Type", "text/html; charset=utf-8")])?.write_all(page.as_bytes())?;
         Ok(())
     })?;
 
@@ -56,8 +51,7 @@ pub fn start(sh: Arc<Shared>) -> anyhow::Result<EspHttpServer<'static>> {
                 "[]".into()
             })
         };
-        req.into_response(200, None, &[("Content-Type", "application/json")])?
-            .write_all(body.as_bytes())?;
+        req.into_response(200, None, &[("Content-Type", "application/json")])?.write_all(body.as_bytes())?;
         Ok(())
     })?;
 
@@ -83,8 +77,7 @@ pub fn start_setup(nvs: EspDefaultNvsPartition, networks: Vec<String>) -> anyhow
     let mut page = String::new();
     web::setup_page(&mut page, &networks)?;
     server.fn_handler("/", Method::Get, move |req| -> anyhow::Result<()> {
-        req.into_response(200, None, &[("Content-Type", "text/html; charset=utf-8")])?
-            .write_all(page.as_bytes())?;
+        req.into_response(200, None, &[("Content-Type", "text/html; charset=utf-8")])?.write_all(page.as_bytes())?;
         Ok(())
     })?;
     server.fn_handler("/wifi", Method::Post, move |mut req| -> anyhow::Result<()> {
@@ -105,8 +98,7 @@ pub fn start_setup(nvs: EspDefaultNvsPartition, networks: Vec<String>) -> anyhow
         };
         let mut page = String::new();
         web::message_page(&mut page, &msg)?;
-        req.into_response(200, None, &[("Content-Type", "text/html; charset=utf-8")])?
-            .write_all(page.as_bytes())?;
+        req.into_response(200, None, &[("Content-Type", "text/html; charset=utf-8")])?.write_all(page.as_bytes())?;
         Ok(())
     })?;
     Ok(server)

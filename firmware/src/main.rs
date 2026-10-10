@@ -79,9 +79,7 @@ fn main() -> anyhow::Result<()> {
     log_heap("boot");
 
     #[cfg(feature = "touch")]
-    let touch_baseline = touch::init()
-        .inspect_err(|e| warn!("touch unavailable: {e:#}"))
-        .ok();
+    let touch_baseline = touch::init().inspect_err(|e| warn!("touch unavailable: {e:#}")).ok();
 
     let settings = settings::load(&nvs)?;
     let mut wifi: wifi::Wifi = BlockingWifi::wrap(EspWifi::new(p.modem, sysloop.clone(), Some(nvs.clone()))?, sysloop)?;
@@ -136,19 +134,13 @@ fn main() -> anyhow::Result<()> {
 
     {
         let sh = shared.clone();
-        std::thread::Builder::new()
-            .stack_size(FETCH_STACK)
-            .spawn(move || fetch_loop(sh, wifi))?;
+        std::thread::Builder::new().stack_size(FETCH_STACK).spawn(move || fetch_loop(sh, wifi))?;
     }
 
     #[cfg(feature = "touch")]
     let touch_rx = touch_baseline.and_then(|baseline| {
         let (tx, rx) = std::sync::mpsc::channel();
-        std::thread::Builder::new()
-            .stack_size(3072)
-            .spawn(move || touch::run(baseline, tx))
-            .ok()
-            .map(|_| rx)
+        std::thread::Builder::new().stack_size(3072).spawn(move || touch::run(baseline, tx)).ok().map(|_| rx)
     });
 
     log_heap("running");
@@ -203,7 +195,14 @@ impl Ui {
         self.pending.push(ev);
     }
 
-    fn frame(&mut self, panel: &mut Panel, canvas: &mut Canvas, bl: &mut backlight::Backlight, sh: &Shared, now_ms: u64) {
+    fn frame(
+        &mut self,
+        panel: &mut Panel,
+        canvas: &mut Canvas,
+        bl: &mut backlight::Backlight,
+        sh: &Shared,
+        now_ms: u64,
+    ) {
         let settings = sh.settings();
         self.sched.set_timing(settings.cycle_min as u32, settings.dwell_s as u32, now_ms);
         let cal = sh.calendar.lock().unwrap_or_else(|e| e.into_inner()).clone();
@@ -227,9 +226,7 @@ impl Ui {
             url: url.clone(),
             host: Some(format!("{HOSTNAME}.local")),
             location: (!settings.place_name.is_empty()).then(|| settings.place_name.clone()),
-            israel: settings.force_israel
-                || settings.cc == "IL"
-                || cal.as_ref().is_some_and(|c| c.model.israel),
+            israel: settings.force_israel || settings.cc == "IL" || cal.as_ref().is_some_and(|c| c.model.israel),
             updated: net.last_fetch.map(|t| {
                 let l = tz.local(t);
                 format!("{} {} {:02}:{:02}", month_short(l.date.m), l.date.d, l.h, l.m)
@@ -349,7 +346,13 @@ fn start_mdns() -> anyhow::Result<esp_idf_svc::mdns::EspMdns> {
 
 /// First run (or the saved network is gone): open access point + setup page.
 /// Restarts after credentials are saved, so it never returns.
-fn setup_mode(panel: &mut Panel, canvas: &mut Canvas, wifi: &mut wifi::Wifi, nvs: EspDefaultNvsPartition, reason: Option<String>) -> ! {
+fn setup_mode(
+    panel: &mut Panel,
+    canvas: &mut Canvas,
+    wifi: &mut wifi::Wifi,
+    nvs: EspDefaultNvsPartition,
+    reason: Option<String>,
+) -> ! {
     let name = wifi::ap_name(wifi);
     let started = wifi::start_ap(wifi, &name).and_then(|(ip, networks)| {
         info!("setup AP {name} at http://{ip}/ ({} networks in range)", networks.len());
@@ -389,12 +392,7 @@ fn fetch_loop(sh: Arc<Shared>, mut wifi: wifi::Wifi) {
         let s = sh.settings();
         let now = clock::now();
         let key = s.fetch_key();
-        let have = sh
-            .calendar
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .as_ref()
-            .is_some_and(|c| c.key == key);
+        let have = sh.calendar.lock().unwrap_or_else(|e| e.into_inner()).as_ref().is_some_and(|c| c.key == key);
 
         if s.place().is_some() && clock::valid() && (woke || !have || now >= next_at) {
             if let Err(e) = wifi::ensure_connected(&mut wifi) {
@@ -417,12 +415,7 @@ fn fetch_loop(sh: Arc<Shared>, mut wifi: wifi::Wifi) {
                     if let Some(tzid) = model.location.tzid.clone() {
                         remember_tz(&sh, &key, tzid);
                     }
-                    let tz = model
-                        .location
-                        .tzid
-                        .as_deref()
-                        .and_then(Tz::for_tzid)
-                        .unwrap_or(tz);
+                    let tz = model.location.tzid.as_deref().and_then(Tz::for_tzid).unwrap_or(tz);
                     st.last_fetch = Some(now);
                     st.error = None;
                     backoff = 0;

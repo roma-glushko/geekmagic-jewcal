@@ -23,10 +23,8 @@ impl<'d> Backlight<'d> {
         pin: impl OutputPin + 'd,
         inverted: bool,
     ) -> anyhow::Result<Self> {
-        let timer = LedcTimerDriver::new(
-            timer,
-            &TimerConfig::new().frequency(5.kHz().into()).resolution(Resolution::Bits8),
-        )?;
+        let timer =
+            LedcTimerDriver::new(timer, &TimerConfig::new().frequency(5.kHz().into()).resolution(Resolution::Bits8))?;
         let ch = LedcDriver::new(channel, timer, pin)?;
         let max = ch.get_max_duty();
         let mut bl = Self { ch, max, inverted, percent: 0 };

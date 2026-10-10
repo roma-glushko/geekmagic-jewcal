@@ -22,12 +22,7 @@ pub fn fetch(s: &Settings, today: CivilDate, now: i64) -> anyhow::Result<Calenda
     let events = httpc::get(&hebcal::events_url(&q, w.start, w.end), MAX_EVENTS, |r| {
         Ok(wire::parse_events(BufReader::with_capacity(512, r), policy)?)
     })?;
-    log::info!(
-        "hebcal: {} items for {:?} (tz {:?})",
-        events.items.len(),
-        events.location.title,
-        events.location.tzid
-    );
+    log::info!("hebcal: {} items for {:?} (tz {:?})", events.items.len(), events.location.title, events.location.tzid);
     // Sunrise/sunset only drive the Hebrew-date rollover and the sky
     // colours: not worth losing the calendar over.
     let sun = match httpc::get(&hebcal::zmanim_url(&q.place, w.sun_start, w.sun_end), MAX_ZMANIM, |r| {
