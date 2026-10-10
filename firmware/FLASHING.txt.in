@@ -1,0 +1,46 @@
+@NAME@
+JewCal, a pixel-art Jewish calendar for the GeekMagic SmallTV Pro (ESP32, 4 MB flash)
+
+!! FOR THE SMALLTV *PRO* (ESP32, touch pad on top) ONLY.
+!! The SmallTV and SmallTV Ultra use other chips (ESP8266, stock firmware
+!! "Ultra-V9.x"; some newer SmallTVs have an ESP32-C2). Do NOT upload these
+!! files through their "Firmware update" web page: an ESP8266 unit would no
+!! longer boot and would need a serial adapter. The espflash and esptool
+!! commands below name the chip (--chip esp32), so they refuse other boards.
+!! SmallTV Ultra owners: use jewcal-ultra-<version>.zip (`make ultra-zip`).
+
+FILES (all for the SmallTV Pro)
+  jewcal-pro-full.bin   Bootloader + partition table + app. Write at 0x0.
+                        Use this for a first install. It also clears saved settings.
+  jewcal-pro-app.bin    The app alone. Write at 0x10000 to update a device that
+                        already runs JewCal; WiFi and city settings are kept.
+  jewcal-pro.elf        Debug symbols: `espflash monitor --elf jewcal-pro.elf`
+                        turns crash backtraces into file:line.
+  SHA256SUMS            Checksums of the files above.
+  flash.sh              Flashes with espflash or esptool, whichever is installed:
+                          ./flash.sh            fresh install
+                          ./flash.sh --update   update, keeps settings
+                          ./flash.sh --backup   save the current firmware first
+
+BACK UP THE CURRENT FIRMWARE FIRST (optional, lets you go back to stock)
+  espflash read-flash --chip esp32 0 0x400000 smalltv-backup.bin
+
+FLASH (connect the SmallTV with a USB *data* cable)
+  espflash:  espflash write-bin --chip esp32 0x0 jewcal-pro-full.bin
+  esptool:   esptool.py --chip esp32 write_flash 0x0 jewcal-pro-full.bin
+  browser:   https://espressif.github.io/esptool-js/
+             Connect and check that it reports an ESP32 (not ESP32-C2), then
+             add jewcal-pro-full.bin at offset 0x0 and Program.
+  update:    espflash write-bin --chip esp32 0x10000 jewcal-pro-app.bin
+
+FIRST RUN
+  1. The screen shows SETUP. From a phone, join the WiFi network JEWCAL-XXXX.
+  2. Open the address shown on the screen, pick your network, enter its password.
+  3. After it restarts, open http://jewcal.local/ (or the IP shown on the info
+     screen) and choose your city. Done: no further setup is needed.
+
+BOARD VARIANT
+  If the backlight never dims at night, your board drives it from GPIO21:
+  build with `make zip FEATURES=backlight-gpio21`.
+
+Calendar data: Hebcal.com. Weather data: Open-Meteo.com. Both CC BY 4.0.

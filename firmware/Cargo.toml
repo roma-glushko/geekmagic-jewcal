@@ -1,0 +1,46 @@
+[package]
+name = "jewcal"
+version = "0.1.0"
+edition = "2021"
+resolver = "2"
+description = "Pixel-art Jewish calendar firmware for the GeekMagic SmallTV Pro"
+
+[[bin]]
+name = "jewcal"
+harness = false
+
+[features]
+default = ["touch"]
+# Top touch sensor (GPIO32 / T9). Turn off if your unit has no sensor.
+touch = []
+# Board variant: backlight on GPIO21 active-high (as in Clawdmeter) instead of
+# GPIO25 inverted PWM (the variant confirmed by the ESPHome community config).
+backlight-gpio21 = []
+
+[profile.release]
+opt-level = "s"
+lto = "thin"
+
+[profile.dev]
+debug = true
+opt-level = "z"
+
+[dependencies]
+esp-idf-hal  = "0.46"
+esp-idf-svc  = { version = "0.52", features = ["experimental"] }
+embedded-svc = "0.29"
+anyhow    = "1"
+log       = "0.4"
+jewcal-model = { path = "../model" }
+jewcal-ui    = { path = "../ui" }
+jewcal-app   = { path = "../app" }
+
+# mDNS (`http://jewcal.local/`) moved out of ESP-IDF into the component registry.
+[[package.metadata.esp-idf-sys.extra_components]]
+remote_component = { name = "espressif/mdns", version = "1.2" }
+
+[build-dependencies]
+embuild = { version = "0.33", features = ["espidf"] }
+
+# Standalone project: the repo-root workspace (host crates) excludes this dir.
+[workspace]

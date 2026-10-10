@@ -1,0 +1,22 @@
+[package]
+name = "jewcal-ultra-core"
+version = "0.1.0"
+edition = "2021"
+description = "JewCal for the GeekMagic SmallTV Ultra (ESP8266): the Rust core linked into the Arduino firmware"
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+jewcal-model = { path = "../../model", default-features = false }
+jewcal-ui    = { path = "../../ui", default-features = false, features = ["packed"] }
+jewcal-app   = { path = "../../app", default-features = false }
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+
+# Standalone project: the repo-root workspace (host crates) excludes `ultra/`.
+[workspace]

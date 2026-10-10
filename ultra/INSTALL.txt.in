@@ -1,0 +1,59 @@
+@NAME@
+JewCal, a pixel-art Jewish calendar for the GeekMagic SmallTV Ultra (ESP8266)
+
+!! FOR THE SMALLTV *ULTRA*: the stock firmware calls itself "Ultra-V9.x" and
+!! its web page shows "Model: SmallTV-Ultra". For the SmallTV Pro (ESP32,
+!! touch pad on top) use the other JewCal release (jewcal-pro-<version>.zip).
+
+FILES
+  jewcal-ultra-installer.bin  Step 1. Small enough for the stock firmware's
+                              updater, whose space is limited (~500 KB).
+  jewcal-ultra.bin            Step 2, and every later update.
+  jewcal-ultra.elf            Debug symbols: decode a crash address with
+                              xtensa-lx106-elf-addr2line -e jewcal-ultra.elf 0x4020....
+  SHA256SUMS                  Checksums of the files above.
+
+INSTALL (over WiFi: no cable, no opening the case)
+  1. Find the SmallTV's address: the stock firmware shows it on its screen.
+  2. Open http://<that address>/update in a browser (the stock web page's
+     firmware update), choose jewcal-ultra-installer.bin and upload it.
+     The SmallTV restarts into the JewCal installer.
+  3. The installer's screen says where to go next. Either open
+     http://<address>/ on your network (if the stock firmware's WiFi was
+     remembered), or join the open WiFi network JEWCAL-INSTALL-XXXX and open
+     http://192.168.4.1/.
+  4. Choose jewcal-ultra.bin and Install. After about half a minute JewCal
+     starts. It joins the network the stock firmware used.
+  5. If the screen shows SETUP instead: join the WiFi network JEWCAL-XXXX
+     from a phone, open http://192.168.4.1/ and pick your network.
+  6. Open http://jewcal.local/ (or the address on JewCal's info screen) and
+     choose your city. Done.
+
+UPDATES
+  Open http://jewcal.local/, click "Update firmware" at the bottom (its
+  address changes at every restart, so other web pages cannot reach it) and
+  upload the new jewcal-ultra.bin. Settings are kept.
+  From a source checkout: make ultra-ota HOST=jewcal.local
+
+FORGET THE WIFI NETWORK
+  The Ultra has no button: use "Forget WiFi" at the bottom of the settings
+  page. JewCal restarts into SETUP (step 5). It also opens SETUP by itself
+  when the saved network cannot be joined.
+
+BACK TO THE STOCK FIRMWARE
+  GeekMagic publishes it at https://github.com/GeekMagicClock/smalltv-ultra
+  (folders Ultra-V9.x.x, a zip with one .bin). Upload that .bin through
+  "Update firmware" on JewCal's settings page. Photos stored by the stock
+  firmware may be gone.
+
+IF SOMETHING GOES WRONG
+  * SAFE MODE on the screen: JewCal crashed 3 times in a row. Open the
+    address on the screen: the page shows the last error and links to the
+    update page, or restarts JewCal.
+  * A SmallTV that does not start at all can only be rewritten through the
+    serial pads inside (remove the 2 screws underneath; 3.3 V USB-UART
+    adapter on 3V3/GND/TXD0/RXD0; hold GPIO0 to GND while powering on):
+      esptool.py --chip esp8266 write_flash 0x0 jewcal-ultra.bin
+
+Times come from Hebcal for the chosen location; ask your rabbi about local
+customs. Calendar data: Hebcal.com. Weather data: Open-Meteo.com. Both CC BY 4.0.

@@ -1,0 +1,8 @@
+[workspace]
+# Host-side crates: `cargo test` / `cargo run -p jewcal-sim` run on the dev machine.
+# The firmwares are their own cargo projects (xtensa targets + build-std) and
+# pull `model`, `ui` and `app` in as path dependencies: `firmware/` for the
+# SmallTV Pro (ESP32), `ultra/core` for the SmallTV Ultra (ESP8266).
+members = ["model", "ui", "app", "sim"]
+exclude = ["firmware", "ultra"]
+resolver = "2"

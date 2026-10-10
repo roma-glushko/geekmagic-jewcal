@@ -1,0 +1,14 @@
+[package]
+name = "jewcal-app"
+version = "0.1.0"
+edition = "2021"
+description = "Device logic shared by the JewCal firmwares: settings and the settings web page"
+
+[features]
+default = ["std"]
+# Without `std` the crate is `no_std` + `alloc` (ESP8266, SmallTV Ultra).
+std = ["jewcal-model/std", "jewcal-ui/std"]
+
+[dependencies]
+jewcal-model = { path = "../model", default-features = false }
+jewcal-ui    = { path = "../ui", default-features = false }

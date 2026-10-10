@@ -1,0 +1,15 @@
+[package]
+name = "jewcal-ui"
+version = "0.1.0"
+edition = "2021"
+description = "Pixel-art screens for the JewCal display (120x120 indexed canvas)"
+
+[features]
+default = ["std"]
+# Without `std` the crate is `no_std` + `alloc` (ESP8266, SmallTV Ultra).
+std = ["jewcal-model/std"]
+# Two pixels per byte in the canvas (7.2 KB instead of 14.4 KB).
+packed = []
+
+[dependencies]
+jewcal-model = { path = "../model", default-features = false }

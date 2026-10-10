@@ -1,0 +1,13 @@
+[package]
+name = "jewcal-sim"
+version = "0.1.0"
+edition = "2021"
+description = "Host tools for JewCal: record Hebcal fixtures, generate the tz table, render screens to PNG"
+publish = false
+
+[dependencies]
+jewcal-model = { path = "../model" }
+jewcal-ui    = { path = "../ui" }
+png  = "0.17"
+ureq = "2"
+serde_json = "1"

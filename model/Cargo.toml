@@ -1,0 +1,15 @@
+[package]
+name = "jewcal-model"
+version = "0.1.0"
+edition = "2021"
+description = "Hebcal-backed Jewish calendar model for the JewCal display"
+
+[features]
+default = ["std"]
+# `std::io::Read` front ends for the streaming parsers (host, ESP32). Without
+# it the crate is `no_std` + `alloc` (ESP8266, SmallTV Ultra).
+std = ["serde/std", "serde_json/std"]
+
+[dependencies]
+serde      = { version = "1", default-features = false, features = ["derive", "alloc"] }
+serde_json = { version = "1", default-features = false, features = ["alloc", "raw_value"] }

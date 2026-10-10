@@ -1,0 +1,14 @@
+target/
+firmware/target/
+firmware/.embuild/
+shots/
+.env
+.DS_Store
+.idea/
+firmware/backup/
+dist/
+ultra/.pio/
+ultra/core/target/
+ultra/.vscode/
+ultra/compile_commands.json
+.cache/
