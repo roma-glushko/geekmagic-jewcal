@@ -3,6 +3,8 @@
 //! ```text
 //! jewcal-sim gen-tz              regenerate model/src/tz_table.rs from /usr/share/zoneinfo
 //! jewcal-sim gen-cfont           regenerate ultra/src/font_body.h (C copy of the BODY font)
+//! jewcal-sim docs-pages [--out DIR] [--chrome PATH] [--images DIR]
+//!                               the web pages as HTML for the user guide; with --chrome, their screenshots
 //! jewcal-sim record              download the Hebcal fixtures used by tests and the gallery
 //! jewcal-sim agenda CITY TIME    print what the model sees at a local time
 //! jewcal-sim render CITY TIME [SCREEN] [--out DIR]
@@ -13,6 +15,7 @@
 
 mod cases;
 mod cfont;
+mod docs;
 mod fixtures;
 mod png_out;
 mod tzgen;
@@ -26,11 +29,12 @@ fn main() {
     let result = match args.first().map(String::as_str) {
         Some("gen-tz") => tzgen::run(),
         Some("gen-cfont") => cfont::run(),
+        Some("docs-pages") => docs::run(&args[1..]),
         Some("record") => fixtures::record_all(),
         Some("agenda") => agenda(&args[1..]),
         Some("render") => render(&args[1..]),
         Some("gallery") => gallery(&args[1..]),
-        _ => Err("usage: jewcal-sim gen-tz | gen-cfont | record | agenda CITY TIME | render CITY TIME [SCREEN] [--out DIR] | gallery [--out DIR]".into()),
+        _ => Err("usage: jewcal-sim gen-tz | gen-cfont | docs-pages [--out DIR] [--chrome PATH] [--images DIR] | record | agenda CITY TIME | render CITY TIME [SCREEN] [--out DIR] | gallery [--out DIR]".into()),
     };
     if let Err(e) = result {
         eprintln!("error: {e}");

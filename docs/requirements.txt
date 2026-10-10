@@ -1,0 +1,3 @@
+# The user guide (mkdocs.yml). Pinned: Read the Docs and CI build the same site.
+mkdocs==1.6.1
+mkdocs-material==9.7.7

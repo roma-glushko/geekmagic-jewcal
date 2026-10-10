@@ -5,6 +5,7 @@
 #   "Update firmware" page;
 # - jewcal-pro: the SmallTV Pro zip;
 # - gallery: every screen rendered by the simulator.
+# The user guide (docs/) is built strictly too; Read the Docs publishes it.
 #
 # CD: pushing a tag v* (e.g. `git tag v0.2.0 && git push origin v0.2.0`)
 # publishes a GitHub release with both zips.
@@ -48,6 +49,8 @@ jobs:
         run: make check
       - name: Render every screen
         run: make gallery
+      - name: Build the user guide (as Read the Docs does)
+        run: make docs
       - uses: actions/upload-artifact@v4
         with:
           name: gallery

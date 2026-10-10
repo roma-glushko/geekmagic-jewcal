@@ -25,10 +25,16 @@
 #   make ultra-stack  deepest stack use per entry point (the loop stack is 4 KB)
 #   make ultra-check  CI's checks on the images: sizes, ROM helpers, RAM, stack budget
 #
+# User guide (docs/ + mkdocs.yml, published on Read the Docs):
+#   make docs         build it as Read the Docs does (strict) -> target/site/index.html
+#   make docs-serve   live preview at http://127.0.0.1:8000/
+#   make docs-images  re-capture the settings and WiFi page screenshots (needs Chrome)
+#
 # Options:
 #   FEATURES=backlight-gpio21   board variant (comma-separated cargo features)
 #   PORT=/dev/cu.usbserial-110  serial port for flash/monitor (auto-detected otherwise)
 #   HOST=192.168.1.23           the SmallTV Ultra for ultra-ota (default jewcal.local)
+#   CHROME=/path/to/chrome      the browser for docs-images (default: Google Chrome on macOS)
 
 SHELL := /bin/bash
 .DEFAULT_GOAL := zip
@@ -64,10 +70,10 @@ ULTRA_PKG    := $(DIST)/$(ULTRA_NAME)
 HOST         ?= jewcal.local
 
 .PHONY: zip build firmware test check firmware-check gallery flash flash-full flash-app backup restore monitor \
-	clean help ultra ultra-zip ultra-ota ultra-stack ultra-check
+	clean help ultra ultra-zip ultra-ota ultra-stack ultra-check docs docs-serve docs-images
 
 help:
-	@sed -n '2,49p' Makefile | sed 's/^# \{0,1\}//'
+	@sed -n '2,57p' Makefile | sed 's/^# \{0,1\}//'
 
 test:
 	cargo test
@@ -194,3 +200,26 @@ ultra-check: ultra
 	@$(ultra_dump)
 	@python3 $(ULTRA_DIR)/scripts/stack_depth.py --max 3072 $(ULTRA_BUILD)/jewcal/code.txt \
 	  $(ULTRA_BUILD)/jewcal/literals.txt $(STACK_ROOTS) | grep -E 'worst|ok:|FAIL'
+
+# ── User guide ──────────────────────────────────────────────────────────────
+
+DOCS_VENV := target/docs-venv
+MKDOCS    := $(DOCS_VENV)/bin/mkdocs
+CHROME    ?= /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+# MkDocs in its own virtualenv, pinned like Read the Docs.
+$(MKDOCS): docs/requirements.txt
+	python3 -m venv $(DOCS_VENV)
+	$(DOCS_VENV)/bin/pip install -q -r docs/requirements.txt
+	touch $(MKDOCS)
+
+docs: $(MKDOCS)
+	$(MKDOCS) build --strict -d target/site
+	@echo "Open target/site/index.html"
+
+docs-serve: $(MKDOCS)
+	$(MKDOCS) serve
+
+# The web pages as the firmware renders them, captured at phone width.
+docs-images:
+	cargo run -q -p jewcal-sim -- docs-pages --chrome "$(CHROME)"

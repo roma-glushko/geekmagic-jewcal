@@ -1,0 +1,60 @@
+site_name: JewCal
+site_description: A pixel-art Jewish calendar for the GeekMagic SmallTV Pro and Ultra
+site_url: !ENV [READTHEDOCS_CANONICAL_URL, "https://geekmagic-jewcal.readthedocs.io/"]
+repo_url: https://github.com/roma-glushko/geekmagic-jewcal
+repo_name: roma-glushko/geekmagic-jewcal
+edit_uri: edit/main/docs/
+copyright: Calendar data from Hebcal.com and weather from Open-Meteo.com (both CC BY 4.0).
+
+exclude_docs: |
+  requirements.txt
+
+nav:
+  - Overview: index.md
+  - Install:
+      - SmallTV Ultra: install-ultra.md
+      - SmallTV Pro: install-pro.md
+  - The screens: screens.md
+  - Settings: settings.md
+  - Troubleshooting: troubleshooting.md
+
+theme:
+  name: material
+  icon:
+    logo: material/calendar-star
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+  features:
+    - navigation.footer
+    - navigation.top
+    - content.tabs.link
+    - toc.follow
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true

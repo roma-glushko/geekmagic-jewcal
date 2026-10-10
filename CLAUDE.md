@@ -34,6 +34,8 @@ make ultra-check                             # CI's Ultra guards: sizes, ROM hel
 make firmware-check                          # clippy on the Pro firmware (CI denies warnings)
 cargo test -p jewcal-ui --features packed    # the UI with the Ultra's 4-bit canvas (part of `make test`)
 cargo run -p jewcal-sim -- gen-cfont         # regenerate ultra/src/font_body.h after changing the BODY font
+make docs / make docs-serve                  # the user guide (docs/, mkdocs.yml; Read the Docs builds .readthedocs.yaml)
+make docs-images                             # re-capture docs/images/*.png from the real web pages (headless Chrome)
 ```
 
 The esp toolchain env is not inherited by tool shells: always `source ~/export-esp.sh` in the same `bash -c`.

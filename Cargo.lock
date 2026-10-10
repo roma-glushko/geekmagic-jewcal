@@ -232,6 +232,7 @@ dependencies = [
 name = "jewcal-sim"
 version = "0.1.0"
 dependencies = [
+ "jewcal-app",
  "jewcal-model",
  "jewcal-ui",
  "png",
