@@ -386,21 +386,6 @@ impl Drop for Chunks {
     }
 }
 
-/// The SmallTV Ultra's own section of the settings page. `info` is a line of
-/// plain text from the firmware (version, memory, last restart); `token` is
-/// the per-boot secret in the update and forget links (see web.cpp).
-fn extras(info: &str, token: &str) -> String {
-    let token = web::html_escape(token);
-    alloc::format!(
-        "<fieldset><legend>Device</legend><p class=dim>{}</p>\
-<p><a href='/update-{token}'>Update firmware</a></p>\
-<form method=post action=/forget onsubmit=\"return confirm('Forget this WiFi network and restart into setup?')\">\
-<input type=hidden name=token value='{token}'>\
-<button style='background:var(--red);color:var(--text)'>Forget WiFi</button></form></fieldset>",
-        web::html_escape(info)
-    )
-}
-
 #[no_mangle]
 pub unsafe extern "C" fn jc_settings_page(
     sink: Sink,
@@ -410,7 +395,7 @@ pub unsafe extern "C" fn jc_settings_page(
     token: *const c_char,
 ) {
     let mut out = Chunks::new(sink, ctx);
-    let _ = core_mut().dev.settings_page(&mut out, text(notice), &extras(text(info), text(token)));
+    let _ = core_mut().dev.settings_page(&mut out, text(notice), &web::device_section(text(info), text(token)));
 }
 
 /// Start collecting a submitted form.
@@ -443,7 +428,7 @@ pub unsafe extern "C" fn jc_form_apply(
     let result = core.dev.apply_form(field);
     drop(form);
     let mut out = Chunks::new(sink, ctx);
-    let _ = core.dev.settings_page(&mut out, &web::save_notice(&result), &extras(text(info), text(token)));
+    let _ = core.dev.settings_page(&mut out, &web::save_notice(&result), &web::device_section(text(info), text(token)));
     result.is_ok()
 }
 

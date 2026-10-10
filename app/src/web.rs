@@ -17,10 +17,10 @@ pub const CSS: &str = r#"<style>
 body{background:var(--bg);color:var(--text);font:15px/1.5 ui-monospace,Menlo,Consolas,monospace;max-width:34rem;margin:0 auto;padding:1rem}
 h1{color:var(--gold);font-size:1.25rem;letter-spacing:.15em;margin:.2rem 0 1rem}
 .screen{display:block;width:240px;height:240px;image-rendering:pixelated;border:4px solid var(--panel);margin:0 auto 1rem}
-fieldset{border:2px solid var(--panel);margin:0 0 1rem;padding:.6rem .8rem}
+fieldset{border:2px solid var(--panel);margin:0 0 1rem;padding:.6rem .8rem;min-width:0}
 legend{color:var(--gold);padding:0 .4rem;text-transform:uppercase;letter-spacing:.1em}
 label{display:block;margin:.35rem 0}
-input,select{background:var(--panel);color:var(--text);border:2px solid #566c86;font:inherit;padding:.3rem .45rem}
+input,select{background:var(--panel);color:var(--text);border:2px solid #566c86;font:inherit;padding:.3rem .45rem;max-width:100%}
 input[type=number]{width:4.5rem}input[type=text],#q{width:100%}
 button{background:var(--gold);color:var(--bg);border:0;font:inherit;font-weight:bold;padding:.6rem 1rem;width:100%;cursor:pointer;text-transform:uppercase;letter-spacing:.1em}
 #res button{background:var(--panel);color:var(--text);text-align:left;margin:.2rem 0;text-transform:none;letter-spacing:0;font-weight:normal}
@@ -198,6 +198,22 @@ pub fn wifi_form(ssid: Option<String>, pass: &str) -> Result<(String, String), S
 /// The network picked or typed in the WiFi form.
 pub fn wifi_ssid(field: impl Fn(&str) -> Option<String>) -> Option<String> {
     field("ssid").filter(|s| !s.is_empty()).or_else(|| field("pick"))
+}
+
+/// The SmallTV Ultra's own section of the settings page (its `extras`).
+/// `info` is a line of plain text from the firmware (version, memory, last
+/// restart); `token` is the per-boot secret in the update and forget links
+/// (see `ultra/src/web.cpp`).
+pub fn device_section(info: &str, token: &str) -> String {
+    let token = html_escape(token);
+    format!(
+        "<fieldset><legend>Device</legend><p class=dim>{}</p>\
+<p><a href='/update-{token}'>Update firmware</a></p>\
+<form method=post action=/forget onsubmit=\"return confirm('Forget this WiFi network and restart into setup?')\">\
+<input type=hidden name=token value='{token}'>\
+<button style='background:var(--red);color:var(--text)'>Forget WiFi</button></form></fieldset>",
+        html_escape(info)
+    )
 }
 
 // ── Settings form ────────────────────────────────────────────────────────────
@@ -466,6 +482,14 @@ mod tests {
         assert!(page.contains("<option value=3 selected>&deg;F, mph, inHg</option>"));
         assert!(page.contains("</form><p id=x><p class=dim>Calendar data"));
         assert!(page.ends_with("</script></body></html>"));
+    }
+
+    #[test]
+    fn device_section_links_carry_the_token() {
+        let html = device_section("JewCal <dev>", "1a2b3c4d");
+        assert!(html.contains("href='/update-1a2b3c4d'"));
+        assert!(html.contains("name=token value='1a2b3c4d'"));
+        assert!(html.contains("JewCal &lt;dev&gt;"));
     }
 
     #[test]
