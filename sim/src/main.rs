@@ -4,7 +4,8 @@
 //! jewcal-sim gen-tz              regenerate model/src/tz_table.rs from /usr/share/zoneinfo
 //! jewcal-sim gen-cfont           regenerate ultra/src/font_body.h (C copy of the BODY font)
 //! jewcal-sim docs-pages [--out DIR] [--chrome PATH] [--images DIR]
-//!                               the web pages as HTML for the user guide; with --chrome, their screenshots
+//!                               the user guide's logo, pixel font and SmallTV picture, and the web pages
+//!                               as HTML; with --chrome, their screenshots
 //! jewcal-sim record              download the Hebcal fixtures used by tests and the gallery
 //! jewcal-sim agenda CITY TIME    print what the model sees at a local time
 //! jewcal-sim render CITY TIME [SCREEN] [--out DIR]
@@ -17,8 +18,10 @@ mod cases;
 mod cfont;
 mod docs;
 mod fixtures;
+mod hero;
 mod png_out;
 mod tzgen;
+mod webfont;
 
 use std::path::PathBuf;
 

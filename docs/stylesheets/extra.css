@@ -1,20 +1,376 @@
-/* The device's Sweetie-16 colors. */
-:root {
-  --md-primary-fg-color: #29366f;
-  --md-primary-fg-color--light: #3b5dc9;
-  --md-primary-fg-color--dark: #1a1c2c;
-  --md-accent-fg-color: #b13e53;
-}
-[data-md-color-scheme="slate"] {
-  --md-default-bg-color: #1a1c2c;
-  --md-accent-fg-color: #ffcd75;
-  --md-typeset-a-color: #41a6f6;
+/* JewCal's look: the device's Sweetie-16 palette, the settings page's
+   monospace text and 2 px panel borders, square corners, and headings in
+   the device's own 5x7 pixel font (docs/assets, made by `make docs-assets`).
+   The font has 8 pixels to the em: sizes of 16, 24 and 32 px draw whole
+   2, 3 and 4 px squares. */
+
+@font-face {
+  font-family: "JewCal Pixel";
+  src: url("../assets/fonts/jewcal-pixel.ttf") format("truetype");
+  font-display: block;
 }
 
-/* Screenshots are pixel art: scale them without blurring. */
+:root {
+  --jc-bg: #1a1c2c;
+  --jc-panel: #333c57;
+  --jc-slate: #566c86;
+  --jc-dim: #94b0c2;
+  --jc-text: #f4f4f4;
+  --jc-gold: #ffcd75;
+  --jc-orange: #ef7d57;
+  --jc-red: #b13e53;
+  --jc-green: #38b764;
+  --jc-lime: #a7f070;
+  --jc-cyan: #73eff7;
+  --jc-sky: #41a6f6;
+  --jc-pixel: "JewCal Pixel", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --md-text-font: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --md-code-font: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-hue: 233;
+  --md-default-bg-color: var(--jc-bg);
+  --md-default-bg-color--light: rgba(26, 28, 44, 0.7);
+  --md-default-bg-color--lighter: rgba(26, 28, 44, 0.3);
+  --md-default-bg-color--lightest: rgba(26, 28, 44, 0.12);
+  --md-default-fg-color: var(--jc-text);
+  --md-default-fg-color--light: var(--jc-dim);
+  --md-default-fg-color--lighter: var(--jc-slate);
+  --md-default-fg-color--lightest: var(--jc-panel);
+  --md-primary-fg-color: var(--jc-bg);
+  --md-primary-fg-color--light: var(--jc-panel);
+  --md-primary-fg-color--dark: var(--jc-bg);
+  --md-primary-bg-color: var(--jc-gold);
+  --md-primary-bg-color--light: var(--jc-dim);
+  --md-accent-fg-color: var(--jc-gold);
+  --md-accent-fg-color--transparent: rgba(255, 205, 117, 0.1);
+  --md-accent-bg-color: var(--jc-bg);
+  --md-typeset-color: var(--jc-text);
+  --md-typeset-a-color: var(--jc-sky);
+  --md-typeset-mark-color: rgba(255, 205, 117, 0.3);
+  --md-typeset-table-color: var(--jc-panel);
+  --md-typeset-table-color--light: rgba(51, 60, 87, 0.4);
+  --md-admonition-bg-color: var(--jc-bg);
+  --md-code-bg-color: var(--jc-panel);
+  --md-code-fg-color: var(--jc-text);
+  --md-code-hl-color: var(--jc-sky);
+  --md-code-hl-color--light: rgba(65, 166, 246, 0.15);
+  --md-code-hl-number-color: var(--jc-orange);
+  --md-code-hl-special-color: var(--jc-red);
+  --md-code-hl-function-color: var(--jc-gold);
+  --md-code-hl-constant-color: var(--jc-orange);
+  --md-code-hl-keyword-color: var(--jc-sky);
+  --md-code-hl-string-color: var(--jc-lime);
+  --md-code-hl-name-color: var(--jc-text);
+  --md-code-hl-operator-color: var(--jc-dim);
+  --md-code-hl-punctuation-color: var(--jc-dim);
+  --md-code-hl-comment-color: var(--jc-dim);
+  --md-code-hl-generic-color: var(--jc-dim);
+  --md-code-hl-variable-color: var(--jc-cyan);
+  --md-footer-bg-color: var(--jc-bg);
+  --md-footer-bg-color--dark: var(--jc-bg);
+  --md-footer-fg-color: var(--jc-text);
+  --md-footer-fg-color--light: var(--jc-dim);
+  --md-footer-fg-color--lighter: var(--jc-slate);
+  --md-shadow-z1: none;
+  --md-shadow-z2: none;
+  --md-shadow-z3: none;
+}
+
+::selection {
+  background-color: var(--jc-gold);
+  color: var(--jc-bg);
+}
+
+/* ── Header, navigation, footer ─────────────────────────────────────────── */
+
+.md-header {
+  border-bottom: 2px solid var(--jc-panel);
+}
+.md-header__title {
+  font-family: var(--jc-pixel);
+  font-size: 16px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+/* The candles: 23 sprite pixels, drawn 1:1. */
+.md-header__button.md-logo img,
+.md-nav__title .md-nav__button.md-logo img {
+  width: 23px;
+  height: 23px;
+  image-rendering: pixelated;
+}
+.md-search__form,
+.md-search__input,
+.md-search__output,
+.md-search__scrollwrap {
+  border-radius: 0;
+}
+
+.md-nav__title {
+  color: var(--jc-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.md-nav__item .md-nav__link--active,
+.md-nav__item .md-nav__link--active code {
+  color: var(--jc-gold);
+}
+@media screen and (max-width: 76.234375em) {
+  .md-nav--primary .md-nav__title[for="__drawer"] {
+    border-bottom: 2px solid var(--jc-panel);
+  }
+}
+
+.md-top {
+  border: 2px solid var(--jc-panel);
+  border-radius: 0;
+  background-color: var(--jc-bg);
+  color: var(--jc-dim);
+}
+
+.md-footer {
+  border-top: 2px solid var(--jc-panel);
+}
+.md-footer__direction {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+/* A pixel heart in the device's red, 7x6 pixels drawn 2:1. */
+.jc-heart {
+  display: inline-block;
+  width: 14px;
+  height: 12px;
+  vertical-align: -1px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6' shape-rendering='crispEdges'%3E%3Cpath fill='%23b13e53' d='M1 0h2v1H1zM4 0h2v1H4zM0 1h7v2H0zM1 3h5v1H1zM2 4h3v1H2zM3 5h1v1H3z'/%3E%3Cpath fill='%23f4f4f4' d='M1 1h1v1H1z'/%3E%3C/svg%3E")
+    no-repeat center / contain;
+}
+.md-footer__title .md-ellipsis {
+  font-family: var(--jc-pixel);
+  font-size: 16px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--jc-gold);
+}
+
+/* ── Text ───────────────────────────────────────────────────────────────── */
+
+.md-typeset {
+  font-size: 0.75rem;
+  line-height: 1.7;
+}
+
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3 {
+  font-family: var(--jc-pixel);
+  font-weight: normal;
+  text-transform: uppercase;
+  color: var(--jc-gold);
+}
+.md-typeset h1 {
+  font-size: 32px;
+  line-height: 40px;
+  letter-spacing: 4px;
+  margin: 0 0 24px;
+}
+/* A section heading sits on a rule, like a legend on the settings page. */
+.md-typeset h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 2px;
+  margin: 48px 0 16px;
+}
+/* The rule takes what the title leaves, and disappears when it wraps. */
+.md-typeset h2::after {
+  content: "";
+  flex: 1 1 0;
+  min-width: 0;
+  border-top: 2px solid var(--jc-panel);
+}
+.md-typeset h3 {
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 2px;
+  color: var(--jc-sky);
+}
+.md-typeset .headerlink {
+  font-family: var(--md-text-font-family);
+  letter-spacing: 0;
+}
+/* A page title needs no permalink, and on a long title it would wrap. */
+.md-typeset h1 .headerlink {
+  display: none;
+}
+@media screen and (max-width: 44.984375em) {
+  .md-typeset h1 {
+    font-size: 24px;
+    line-height: 32px;
+    letter-spacing: 3px;
+  }
+  .md-typeset h2::after {
+    display: none;
+  }
+}
+
+.md-typeset a {
+  text-decoration: underline;
+  text-decoration-color: rgba(65, 166, 246, 0.4);
+  text-underline-offset: 0.2em;
+}
+.md-typeset a:hover,
+.md-typeset a:focus {
+  text-decoration-color: currentcolor;
+}
+.md-typeset .headerlink,
+.md-typeset a:has(> img) {
+  text-decoration: none;
+}
+
+/* Buttons, like the settings page's Save: gold, square, in the pixel font. */
+.md-typeset .md-button {
+  margin: 0 8px 8px 0;
+  padding: 8px 16px;
+  border: 2px solid var(--jc-gold);
+  border-radius: 0;
+  color: var(--jc-gold);
+  font-family: var(--jc-pixel);
+  font-size: 16px;
+  font-weight: normal;
+  line-height: 24px;
+  letter-spacing: 2px;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.md-typeset .md-button--primary {
+  background-color: var(--jc-gold);
+  color: var(--jc-bg);
+}
+.md-typeset .md-button:hover,
+.md-typeset .md-button:focus {
+  border-color: var(--jc-text);
+  background-color: var(--jc-text);
+  color: var(--jc-bg);
+}
+
+.md-typeset ul {
+  list-style-type: square;
+}
+.md-typeset ul ul {
+  list-style-type: square;
+}
+.md-typeset li::marker {
+  color: var(--jc-gold);
+}
+
+.md-typeset hr {
+  border-bottom: 2px solid var(--jc-panel);
+}
+
+.md-typeset code {
+  border-radius: 0;
+  font-size: 0.95em;
+}
+.md-typeset :not(pre) > code {
+  color: var(--jc-cyan);
+}
+.md-typeset a code {
+  color: currentcolor;
+}
+.md-typeset pre > code,
+.md-typeset .highlight {
+  border-radius: 0;
+}
+
+/* ── Admonitions: a panel in the note's color, with a title bar ─────────── */
+
+.md-typeset .admonition,
+.md-typeset details {
+  --jc-note: var(--jc-sky);
+  border: 2px solid var(--jc-note) !important;
+  border-radius: 0;
+  font-size: 0.7rem;
+}
+.md-typeset .admonition.info,
+.md-typeset details.info {
+  --jc-note: var(--jc-cyan);
+}
+.md-typeset .admonition.tip,
+.md-typeset details.tip {
+  --jc-note: var(--jc-green);
+}
+.md-typeset .admonition.question,
+.md-typeset details.question {
+  --jc-note: var(--jc-lime);
+}
+.md-typeset .admonition.warning,
+.md-typeset details.warning {
+  --jc-note: var(--jc-orange);
+}
+.md-typeset .admonition.danger,
+.md-typeset details.danger {
+  --jc-note: var(--jc-red);
+}
+.md-typeset :is(.admonition, details) > :is(.admonition-title, summary) {
+  background-color: var(--jc-note) !important;
+  color: var(--jc-bg);
+  border: 0;
+  font-family: var(--jc-pixel);
+  font-size: 16px;
+  font-weight: normal;
+  line-height: 24px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.md-typeset :is(.admonition, details).danger > :is(.admonition-title, summary) {
+  color: var(--jc-text);
+}
+.md-typeset :is(.admonition, details) > :is(.admonition-title, summary)::before,
+.md-typeset details > summary::after {
+  color: inherit !important;
+  background-color: currentcolor !important;
+}
+
+/* ── Tables and tabs ────────────────────────────────────────────────────── */
+
+.md-typeset table:not([class]) {
+  border: 2px solid var(--jc-panel);
+  border-radius: 0;
+  font-size: 0.7rem;
+}
+.md-typeset table:not([class]) th {
+  background-color: var(--jc-panel);
+  color: var(--jc-gold);
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.md-typeset table:not([class]) td {
+  border-top: 2px solid var(--jc-panel);
+}
+.md-typeset table:not([class]) tbody tr:hover {
+  box-shadow: none;
+}
+
+.md-typeset .tabbed-labels > label {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.js .md-typeset .tabbed-labels::before {
+  background: var(--jc-gold);
+}
+
+/* ── Pictures ───────────────────────────────────────────────────────────── */
+
+/* Screens are pixel art: framed like the live screen on the settings page,
+   and scaled without blurring. */
 .md-typeset img[src*="screens/"] {
   image-rendering: pixelated;
-  border-radius: 6px;
+  border: 4px solid var(--jc-panel);
 }
 
 /* A grid of screen captures with captions. */
@@ -27,10 +383,12 @@
 .md-typeset .screens figure {
   margin: 0;
 }
-.md-typeset .screens figcaption {
+.md-typeset figcaption {
   max-width: none;
   margin: 0.4rem auto 0;
-  font-size: 0.75rem;
+  color: var(--jc-dim);
+  font-size: 0.7rem;
+  font-style: normal;
 }
 /* No line break between a picture and its caption. */
 .md-typeset figure > br {
@@ -41,6 +399,21 @@
 .md-typeset img.page {
   max-width: 360px;
   width: 100%;
-  border: 1px solid var(--md-default-fg-color--lightest);
-  border-radius: 6px;
+  border: 2px solid var(--jc-panel);
+}
+
+/* The SmallTV on the overview page: 146 art pixels, drawn 3:1 (2:1 on
+   phones). */
+.md-typeset .hero {
+  margin: 0 auto 1.5rem;
+}
+.md-typeset img.smalltv {
+  width: 438px;
+  max-width: 100%;
+  image-rendering: pixelated;
+}
+@media screen and (max-width: 29.984375em) {
+  .md-typeset img.smalltv {
+    width: 292px;
+  }
 }

@@ -35,7 +35,7 @@ make firmware-check                          # clippy on the Pro firmware (CI de
 cargo test -p jewcal-ui --features packed    # the UI with the Ultra's 4-bit canvas (part of `make test`)
 cargo run -p jewcal-sim -- gen-cfont         # regenerate ultra/src/font_body.h after changing the BODY font
 make docs / make docs-serve                  # the user guide (docs/, mkdocs.yml; Read the Docs builds .readthedocs.yaml)
-make docs-images                             # re-capture docs/images/*.png from the real web pages (headless Chrome)
+make docs-assets                             # regenerate docs/assets (logo, pixel font, animated SmallTV) and docs/images (pages, headless Chrome)
 ```
 
 The esp toolchain env is not inherited by tool shells: always `source ~/export-esp.sh` in the same `bash -c`.
@@ -59,7 +59,8 @@ The esp toolchain env is not inherited by tool shells: always `source ~/export-e
 | `ui/src/screens/*` | Main (with the season ribbon), period, upcoming, month, `holidays.rs` (Rosh Hashana, Yom Kippur, Sukkot, Pesach, Shavuot, Purim, Tisha B'Av), `seasons.rs` (Omer, Elul), `festival.rs` (Chanukah), `weather.rs`, info/setup/message |
 | `ui/src/scheduler.rs` | Main screen by default; secondary screens every `cycle_min`, `dwell_s` each |
 | `ui/src/text.rs` | Hebcal title → display text, abbreviation ladder (`fit`), wrapping, countdowns |
-| `sim/src/*` | Fixture recorder, gallery and PNG renderer, tz table generator |
+| `sim/src/*` | Fixture recorder, gallery and PNG renderer, tz table generator; `docs.rs`, `webfont.rs`, `hero.rs` make the user guide's assets |
+| `docs/` | The user guide. `stylesheets/extra.css` is the device's look: Sweetie-16, monospace text, headings in the generated BODY web font (8 px to the em: use 16/24/32 px so pixels stay whole) |
 | `firmware/src/main.rs` | Boot sequence, render loop (`Ui`, `Panel`), fetch thread, setup mode |
 | `firmware/src/display.rs` | ST7789 driver, 2× indexed flush with DMA |
 | `firmware/src/httpc.rs` | One-shot HTTPS with a streamed, capped body; a global lock allows one TLS session at a time |

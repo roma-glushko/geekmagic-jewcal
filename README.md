@@ -36,7 +36,7 @@ and follow its guide:
 model/       Hebcal URLs, streaming JSON parsing, the calendar model, time zones, Hebrew dates, weather
 ui/          120×120 pixel canvas, fonts and sprites, the screens, the screen rotation
 app/         settings, the settings web page, the Ultra's main loop
-sim/         host tools: fixtures, PNG gallery, docs screenshots, tz table and C font generators
+sim/         host tools: fixtures, PNG gallery, the user guide's pictures and pixel font, tz table and C font generators
 firmware/    SmallTV Pro: Rust on ESP-IDF
 ultra/       SmallTV Ultra: Arduino C++ (src/), the Rust core as a no_std staticlib (core/), the installer (src/loader/)
 docs/        the user guide (MkDocs, published on Read the Docs)

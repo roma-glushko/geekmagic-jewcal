@@ -4,7 +4,10 @@ site_url: !ENV [READTHEDOCS_CANONICAL_URL, "https://geekmagic-jewcal.readthedocs
 repo_url: https://github.com/roma-glushko/geekmagic-jewcal
 repo_name: roma-glushko/geekmagic-jewcal
 edit_uri: edit/main/docs/
-copyright: Calendar data from Hebcal.com and weather from Open-Meteo.com (both CC BY 4.0).
+copyright: >-
+  Made with <span class="jc-heart" role="img" aria-label="love"></span> by
+  <a href="https://github.com/roma-glushko">Roman Hlushko</a>.
+  Calendar data from Hebcal.com and weather from Open-Meteo.com (both CC BY 4.0).
 
 exclude_docs: |
   requirements.txt
@@ -17,27 +20,21 @@ nav:
   - The screens: screens.md
   - Settings: settings.md
   - Troubleshooting: troubleshooting.md
+  - Releases: https://github.com/roma-glushko/geekmagic-jewcal/releases
 
+# The device's look: one dark scheme in its palette, its pixel font and
+# candles (docs/stylesheets/extra.css, docs/assets).
 theme:
   name: material
+  logo: assets/logo.png
+  favicon: assets/logo.png
+  font: false
   icon:
-    logo: material/calendar-star
     repo: fontawesome/brands/github
   palette:
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: custom
-      accent: custom
-      toggle:
-        icon: material/weather-sunny
-        name: Switch to light mode
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: custom
-      accent: custom
-      toggle:
-        icon: material/weather-night
-        name: Switch to dark mode
+    scheme: slate
+    primary: custom
+    accent: custom
   features:
     - navigation.footer
     - navigation.top

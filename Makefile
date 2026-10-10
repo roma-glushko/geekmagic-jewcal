@@ -28,13 +28,14 @@
 # User guide (docs/ + mkdocs.yml, published on Read the Docs):
 #   make docs         build it as Read the Docs does (strict) -> target/site/index.html
 #   make docs-serve   live preview at http://127.0.0.1:8000/
-#   make docs-images  re-capture the settings and WiFi page screenshots (needs Chrome)
+#   make docs-assets  regenerate the logo, pixel font and SmallTV picture (docs/assets) and
+#                     re-capture the settings and WiFi page screenshots (docs/images; needs Chrome)
 #
 # Options:
 #   FEATURES=backlight-gpio21   board variant (comma-separated cargo features)
 #   PORT=/dev/cu.usbserial-110  serial port for flash/monitor (auto-detected otherwise)
 #   HOST=192.168.1.23           the SmallTV Ultra for ultra-ota (default jewcal.local)
-#   CHROME=/path/to/chrome      the browser for docs-images (default: Google Chrome on macOS)
+#   CHROME=/path/to/chrome      the browser for docs-assets (default: Google Chrome on macOS)
 
 SHELL := /bin/bash
 .DEFAULT_GOAL := zip
@@ -70,7 +71,7 @@ ULTRA_PKG    := $(DIST)/$(ULTRA_NAME)
 HOST         ?= jewcal.local
 
 .PHONY: zip build firmware test check firmware-check gallery flash flash-full flash-app backup restore monitor \
-	clean help ultra ultra-zip ultra-ota ultra-stack ultra-check docs docs-serve docs-images
+	clean help ultra ultra-zip ultra-ota ultra-stack ultra-check docs docs-serve docs-assets
 
 help:
 	@sed -n '2,57p' Makefile | sed 's/^# \{0,1\}//'
@@ -220,6 +221,7 @@ docs: $(MKDOCS)
 docs-serve: $(MKDOCS)
 	$(MKDOCS) serve
 
-# The web pages as the firmware renders them, captured at phone width.
-docs-images:
+# Drawn from the device's own sprites, font and screens; the web pages as the
+# firmware renders them, captured at phone width.
+docs-assets:
 	cargo run -q -p jewcal-sim -- docs-pages --chrome "$(CHROME)"

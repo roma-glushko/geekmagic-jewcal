@@ -5,6 +5,7 @@ use std::fs::{self, File};
 use std::io::BufWriter;
 use std::path::Path;
 
+use jewcal_model::calendar::CalendarModel;
 use jewcal_model::snapshot::Snapshot;
 use jewcal_ui::canvas::Canvas;
 use jewcal_ui::palette::{self, BG};
@@ -42,20 +43,25 @@ fn parse_screen(s: &str) -> Result<Screen, String> {
     Screen::ALL.into_iter().find(|x| x.name() == s).ok_or_else(|| format!("unknown screen {s:?}"))
 }
 
-/// Render one case; returns the file names written.
-pub fn render_case(case: &Case, screen: Option<&str>, out: &Path) -> Result<Vec<String>, Box<dyn std::error::Error>> {
-    fs::create_dir_all(out)?;
-    let (model, tz, now) = fixtures::load(case)?;
-    let s = Snapshot::at(&model, &tz, now);
-    let weather = fixtures::weather(case, now);
-    let status = Status {
+/// What a device on a home network would know about itself.
+pub fn sample_status(case: &Case, model: &CalendarModel, s: &Snapshot) -> Status {
+    Status {
         url: Some("http://192.168.1.42/".into()),
         host: Some("jewcal.local".into()),
         location: model.location.title.clone().or_else(|| Some(case.city.slug().to_uppercase())),
         israel: model.israel,
         updated: Some(format!("{} 03:12", jewcal_model::time::month_short(s.today.m))),
         error: None,
-    };
+    }
+}
+
+/// Render one case; returns the file names written.
+pub fn render_case(case: &Case, screen: Option<&str>, out: &Path) -> Result<Vec<String>, Box<dyn std::error::Error>> {
+    fs::create_dir_all(out)?;
+    let (model, tz, now) = fixtures::load(case)?;
+    let s = Snapshot::at(&model, &tz, now);
+    let weather = fixtures::weather(case, now);
+    let status = sample_status(case, &model, &s);
     let screens: Vec<Screen> = match screen {
         Some(name) => vec![parse_screen(name)?],
         None => std::iter::once(Screen::Main).chain(available(&s, weather.as_ref())).collect(),

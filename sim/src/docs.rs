@@ -1,12 +1,16 @@
-//! `docs-pages`: the device's web pages as static HTML for the user guide,
-//! and, with `--chrome`, their screenshots (`make docs-images`). Same code as
-//! the firmware serves, with sample settings.
+//! `docs-pages`: the user guide's generated assets (`make docs-assets`):
+//! - the logo, the pixel font and the SmallTV picture on the overview page;
+//! - the device's web pages as static HTML, from the same code the firmware
+//!   serves, with sample settings, and with `--chrome` their screenshots.
 
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use jewcal_app::web::{self, PageStatus};
 use jewcal_app::Settings;
+use jewcal_ui::palette::{CLEAR, SWEETIE16};
+use jewcal_ui::sprite::Sprite;
+use jewcal_ui::sprites;
 
 /// Headless Chrome lays pages out at least 500 px wide: a large phone.
 const WIDTH: u32 = 500;
@@ -26,6 +30,9 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     }
     std::fs::create_dir_all(&out)?;
     write_pages(&out)?;
+    write_logo(Path::new("docs/assets/logo.png"))?;
+    crate::webfont::write(Path::new("docs/assets/fonts/jewcal-pixel.ttf"))?;
+    crate::hero::write(Path::new("docs/assets/smalltv.png"), &out.join("smalltv-3x.png"))?;
     println!("wrote {}/settings.html and setup.html", out.display());
     if let Some(chrome) = chrome {
         std::fs::create_dir_all(&images)?;
@@ -62,6 +69,65 @@ fn write_pages(out: &Path) -> Result<(), Box<dyn std::error::Error>> {
     let mut setup = String::new();
     web::setup_page(&mut setup, &networks)?;
     std::fs::write(out.join("setup.html"), setup)?;
+    Ok(())
+}
+
+/// The docs' logo: the device's two Shabbat candles, lit, cropped and
+/// scaled up (transparent RGBA; the theme shows it pixelated).
+fn write_logo(path: &Path) -> Result<(), Box<dyn std::error::Error>> {
+    const N: usize = 24;
+    const SCALE: usize = 8;
+    let mut px = [CLEAR; N * N];
+    let mut blit = |s: &Sprite, x0: i32, y0: i32| {
+        for y in 0..s.h as i32 {
+            for x in 0..s.w as i32 {
+                let c = s.px[(y * s.w as i32 + x) as usize];
+                let (tx, ty) = (x0 + x, y0 + y);
+                if c != CLEAR && (0..N as i32).contains(&tx) && (0..N as i32).contains(&ty) {
+                    px[ty as usize * N + tx as usize] = c;
+                }
+            }
+        }
+    };
+    blit(&sprites::CANDLES, 0, 0);
+    for (x, y) in sprites::CANDLES_FLAMES {
+        blit(&sprites::FLAME[0], x, y);
+    }
+    let lit = |x: usize, y: usize| px[y * N + x] != CLEAR;
+    let xs: Vec<usize> = (0..N).filter(|&x| (0..N).any(|y| lit(x, y))).collect();
+    let ys: Vec<usize> = (0..N).filter(|&y| (0..N).any(|x| lit(x, y))).collect();
+    let (x0, x1, y0, y1) = (xs[0], xs[xs.len() - 1], ys[0], ys[ys.len() - 1]);
+    // Square, so it sits well in the header and as a favicon.
+    let side = (x1 - x0).max(y1 - y0) + 1;
+    let (ox, oy) = (x0 as i64 - ((side - (x1 - x0 + 1)) / 2) as i64, y0 as i64 - ((side - (y1 - y0 + 1)) / 2) as i64);
+    let size = (side * SCALE) as u32;
+    let mut rgba = vec![0u8; (size * size * 4) as usize];
+    for y in 0..side {
+        for x in 0..side {
+            let (sx, sy) = (ox + x as i64, oy + y as i64);
+            if !(0..N as i64).contains(&sx) || !(0..N as i64).contains(&sy) {
+                continue;
+            }
+            let c = px[sy as usize * N + sx as usize];
+            if c == CLEAR {
+                continue;
+            }
+            let rgb = SWEETIE16[c as usize & 15];
+            for dy in 0..SCALE {
+                for dx in 0..SCALE {
+                    let i = ((y * SCALE + dy) * side * SCALE + x * SCALE + dx) * 4;
+                    rgba[i..i + 4].copy_from_slice(&[(rgb >> 16) as u8, (rgb >> 8) as u8, rgb as u8, 255]);
+                }
+            }
+        }
+    }
+    std::fs::create_dir_all(path.parent().unwrap())?;
+    let mut enc = png::Encoder::new(std::io::BufWriter::new(std::fs::File::create(path)?), size, size);
+    enc.set_color(png::ColorType::Rgba);
+    enc.set_depth(png::BitDepth::Eight);
+    enc.set_compression(png::Compression::Best);
+    enc.write_header()?.write_image_data(&rgba)?;
+    println!("wrote {} ({size}x{size})", path.display());
     Ok(())
 }
 

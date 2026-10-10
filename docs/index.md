@@ -1,5 +1,9 @@
 # JewCal
 
+<figure class="hero" markdown="span">
+  ![A SmallTV running JewCal. Its screen cycles through the main screen before Shabbat, a three-day Yom Tov evening by evening, Pesach, Chanukah and the weather.](assets/smalltv.png){ .smalltv }
+</figure>
+
 **A pixel-art Jewish calendar for the GeekMagic SmallTV.** It replaces the little desk display's firmware and shows,
 for your city:
 
@@ -10,24 +14,12 @@ for your city:
 - **The seasons:** Elul, the Ten Days of Return, the Omer count, the Three Weeks.
 - **A screen for each holiday**, and the **weather**.
 
-<div class="screens" markdown>
-<figure markdown="span">
-  ![The main screen before Shabbat](screens/today-friday-main.png){ width="240" }
-  <figcaption>The main screen: Shabbat is coming</figcaption>
-</figure>
-<figure markdown="span">
-  ![A three-day Yom Tov, evening by evening](screens/erev-pesach-3day-period.png){ width="240" }
-  <figcaption>A three-day chag, evening by evening</figcaption>
-</figure>
-<figure markdown="span">
-  ![The Pesach screen](screens/pesach-2nd-night-pesach.png){ width="240" }
-  <figcaption>Every holiday has its own screen</figcaption>
-</figure>
-</div>
-
 It runs on its own: the times come from [Hebcal.com](https://www.hebcal.com) over your WiFi, the screens rotate by
 themselves, and nothing needs touching on Shabbat or Yom Tov. You set it up once from your phone, on a settings
 page the device serves on your network, like the original firmware.
+
+[Download JewCal](https://github.com/roma-glushko/geekmagic-jewcal/releases/latest){ .md-button .md-button--primary }
+[All releases](https://github.com/roma-glushko/geekmagic-jewcal/releases){ .md-button }
 
 ## Which SmallTV do I have?
 
