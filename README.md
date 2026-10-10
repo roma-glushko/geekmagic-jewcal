@@ -2,8 +2,10 @@
 
 [![CI](https://github.com/roma-glushko/geekmagic-jewcal/actions/workflows/ci.yml/badge.svg)](https://github.com/roma-glushko/geekmagic-jewcal/actions/workflows/ci.yml)
 [![Docs](https://readthedocs.org/projects/geekmagic-jewcal/badge/?version=latest)](https://geekmagic-jewcal.readthedocs.io/)
+[![SmallTV Ultra: tested on a real device](https://img.shields.io/badge/SmallTV_Ultra-tested_on_a_real_device-38b764)](https://geekmagic-jewcal.readthedocs.io/en/latest/install-ultra/)
 
-Firmware for the **GeekMagic SmallTV Ultra** (ESP8266) and **SmallTV Pro** (ESP32) that shows, for your city:
+Firmware for the **[GeekMagic SmallTV Ultra](https://geekmagic.cc/products/smalltv-ultra/)** (ESP8266) and
+**[SmallTV Pro](https://geekmagic.cc/products/smalltv-pro/)** (ESP32) that shows, for your city:
 - Shabbat and Yom Tov with candle-lighting and havdalah times; stacked days are spelled out evening by evening;
 - Chol HaMoed, fasts, Rosh Chodesh and the parsha;
 - the seasons;
@@ -28,7 +30,8 @@ and follow its guide:
 | SmallTV **Ultra** (stock firmware "Ultra-V9.x") | `jewcal-ultra-<version>.zip` | [over WiFi, two uploads](https://geekmagic-jewcal.readthedocs.io/en/latest/install-ultra/) |
 | SmallTV **Pro** (touch pad on top) | `jewcal-pro-<version>.zip` | [over USB](https://geekmagic-jewcal.readthedocs.io/en/latest/install-pro/) (not yet tested on hardware) |
 
-> ⚠️ Never upload one model's files to the other: the device would not start. The ESP32-C2 SmallTV is not supported.
+> ⚠️ Never upload one model's files to the other: the device would not start. SmallTVs with an ESP32-C2 or ESP32-S3
+> chip are not supported.
 
 ## Development
 

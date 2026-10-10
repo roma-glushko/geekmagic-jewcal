@@ -335,6 +335,30 @@
   background-color: currentcolor !important;
 }
 
+/* A status badge, such as "Tested on a real device": a pixel check and the
+   pixel font on the device's green. */
+.md-typeset .jc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 10px;
+  background-color: var(--jc-green);
+  color: var(--jc-bg);
+  font-family: var(--jc-pixel);
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.md-typeset .jc-badge::before {
+  content: "";
+  width: 14px;
+  height: 10px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 5' shape-rendering='crispEdges'%3E%3Cpath fill='%231a1c2c' d='M5 0h2v1H5zM4 1h2v1H4zM0 2h2v1H0zM3 2h2v1H3zM1 3h3v1H1zM2 4h1v1H2z'/%3E%3C/svg%3E")
+    no-repeat center / contain;
+}
+
 /* ── Tables and tabs ────────────────────────────────────────────────────── */
 
 .md-typeset table:not([class]) {
@@ -351,6 +375,9 @@
 }
 .md-typeset table:not([class]) td {
   border-top: 2px solid var(--jc-panel);
+}
+.md-typeset table:not([class]) th a {
+  color: inherit;
 }
 .md-typeset table:not([class]) tbody tr:hover {
   box-shadow: none;

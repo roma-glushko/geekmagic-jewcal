@@ -4,7 +4,7 @@
   ![A SmallTV running JewCal. Its screen cycles through the main screen before Shabbat, a three-day Yom Tov evening by evening, Pesach, Chanukah and the weather.](assets/smalltv.png){ .smalltv }
 </figure>
 
-**A pixel-art Jewish calendar for the GeekMagic SmallTV.** It replaces the little desk display's firmware and shows,
+**A pixel-art Jewish calendar for the [GeekMagic SmallTV](https://geekmagic.cc/products/).** It replaces the little desk display's firmware and shows,
 for your city:
 
 - **Shabbat and Yom Tov**, with candle-lighting and havdalah times. Two days of Yom Tov running into Shabbat are
@@ -25,18 +25,20 @@ page the device serves on your network, like the original firmware.
 
 JewCal runs on two models, and each one has its own download. The two are not interchangeable.
 
-| | SmallTV **Ultra** | SmallTV **Pro** |
+| | [SmallTV **Ultra**](https://geekmagic.cc/products/smalltv-ultra/) | [SmallTV **Pro**](https://geekmagic.cc/products/smalltv-pro/) |
 |---|---|---|
 | How to tell | the stock web page shows **Model: SmallTV-Ultra**, firmware **Ultra-V9.x**; plain top | a touch-sensitive top |
-| How JewCal is installed | over WiFi, in two uploads: no cable, no tools | over a USB cable (*not yet tested on a real Pro*) |
+| How JewCal is installed | over WiFi, in two uploads: no cable, no tools | over a USB cable |
+| On a real device | <span class="jc-badge">Tested</span> | not yet tested |
 | Download | `jewcal-ultra-<version>.zip` | `jewcal-pro-<version>.zip` |
 
 The stock firmware shows the device's address (like `192.168.0.87`) on its screen. Open that address in a browser
-to see the model.
+to see the model. GeekMagic's [model comparison](https://geekmagic.cc/compare/) has the hardware details.
 
 !!! danger "Never upload one model's files to the other"
     The wrong file leaves the device unable to start. A SmallTV Ultra then needs its case opened and a serial adapter
-    to recover. Some newer plain "SmallTV" units have a different chip (ESP32-C2); JewCal does not support them.
+    to recover. Some units have a different chip: newer plain "SmallTV" models (ESP32-C2) and newer Pro hardware
+    (ESP32-S3). JewCal does not support them.
 
 ## Setup in three steps
 

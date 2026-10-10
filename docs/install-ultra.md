@@ -1,6 +1,9 @@
 # Install on the SmallTV Ultra
 
-Everything happens over WiFi from a browser: no cable, no tools, no opening the case. It takes about ten minutes.
+<span class="jc-badge">Tested on a real device</span>
+
+This guide is for the [GeekMagic SmallTV Ultra](https://geekmagic.cc/products/smalltv-ultra/). Everything happens over WiFi from a browser: no
+cable, no tools, no opening the case. It takes about ten minutes.
 
 The original firmware's update page only accepts small files, so JewCal goes on in **two uploads**: first a small
 **installer**, then JewCal itself.

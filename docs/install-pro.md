@@ -1,6 +1,7 @@
 # Install on the SmallTV Pro
 
-The SmallTV Pro is installed over a USB cable, from a browser or with a command-line tool.
+The [GeekMagic SmallTV Pro](https://geekmagic.cc/products/smalltv-pro/) is installed over a USB cable, from a
+browser or with a command-line tool.
 
 !!! warning "Not yet tested on a real SmallTV Pro"
     The Pro firmware builds and passes every check, but nobody has run it on a Pro yet. If you try it, please
@@ -19,6 +20,8 @@ The SmallTV Pro is installed over a USB cable, from a browser or with a command-
 
 !!! tip "Keep a copy of the original firmware"
     With a terminal, `./flash.sh --backup` saves the device's current firmware before anything is overwritten.
+    GeekMagic also publishes its firmware at
+    [github.com/GeekMagicClock/smalltv-pro](https://github.com/GeekMagicClock/smalltv-pro).
 
 ## 1. Install
 
@@ -27,7 +30,7 @@ The SmallTV Pro is installed over a USB cable, from a browser or with a command-
     1. Connect the SmallTV Pro to the computer with the USB cable.
     2. Open the [ESP web flasher](https://espressif.github.io/esptool-js/) and press **Connect**. Pick the serial port
        that appeared when you plugged the device in.
-    3. Check that it reports an **ESP32** chip, not an ESP32-C2 or an ESP8266.
+    3. Check that it reports an **ESP32** chip, not an ESP32-S3, an ESP32-C2 or an ESP8266.
     4. Set the address to **`0x0`**, add **`jewcal-pro-full.bin`**, and press **Program**.
     5. When it finishes, unplug the device and plug it back in.
 
