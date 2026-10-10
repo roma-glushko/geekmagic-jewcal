@@ -20,8 +20,9 @@ Three cargo "worlds":
 ```bash
 make zip                                     # Pro: build + dist/jewcal-pro-<ver>-<commit>.zip (full image @0x0, app @0x10000, elf)
 make flash PORT=/dev/cu.usbserial-XXXX       # build + flash + monitor (FEATURES=backlight-gpio21 for the other board)
+make check                                   # everything CI runs on the host (fmt, clippy -D warnings, tests, no_std)
 cargo test                                   # host tests (model + ui)
-cargo clippy --all-targets                   # keep clean
+cargo clippy --all-targets                   # keep clean (CI denies warnings)
 cargo run -p jewcal-sim -- gallery --out shots   # render every screen -> shots/index.html (view PNGs to review art)
 cargo run -p jewcal-sim -- agenda nyc 2027-04-21T12:00
 cd firmware && bash -c 'source ~/export-esp.sh && cargo build --release'   # device build
@@ -29,6 +30,8 @@ make flash                                   # build + flash + monitor (first ti
 make ultra                                   # SmallTV Ultra: installer + firmware (PlatformIO in ~/.platformio/penv)
 make ultra-zip                               # -> dist/jewcal-ultra-<ver>-<commit>.zip
 make ultra-ota HOST=jewcal.local             # upload to an Ultra already running JewCal
+make ultra-check                             # CI's Ultra guards: sizes, ROM helpers, static RAM, 3 KB stack budget
+make firmware-check                          # clippy on the Pro firmware (CI denies warnings)
 cargo test -p jewcal-ui --features packed    # the UI with the Ultra's 4-bit canvas (part of `make test`)
 cargo run -p jewcal-sim -- gen-cfont         # regenerate ultra/src/font_body.h after changing the BODY font
 ```
@@ -69,6 +72,14 @@ The esp toolchain env is not inherited by tool shells: always `source ~/export-e
 | `ultra/src/net.cpp`, `web.cpp` | Plain-HTTP streaming GET, WiFi join/AP; ESP8266WebServer routes, `/update` (OTA) |
 | `ultra/src/crash.cpp`, `store.cpp` | Crash counter in RTC memory (safe mode after 3); settings text in EEPROM |
 | `ultra/src/loader/installer.cpp` | The installer: small enough for the stock updater, receives the full image |
+
+CI (`.github/workflows/ci.yml`) runs exactly these targets:
+- the host job runs `make check` and the gallery;
+- the Ultra job runs `make ultra-check` and `ultra-zip`;
+- the Pro job runs `make firmware-check` and `zip`;
+- a `v*` tag publishes a release with both zips.
+
+Keep the Makefile targets and the workflow in step. Our C++ is built with `-Wall -Wextra -Werror`.
 
 ## Gotchas
 

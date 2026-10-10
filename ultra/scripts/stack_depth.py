@@ -12,11 +12,17 @@
 # web server: add ~800 B for lwIP there). Recursion counts once. Crash paths
 # (panic, abort, restart) are leaves: the device is restarting anyway.
 #
-#   python3 stack_depth.py code.txt literals.txt ROOT...
+#   python3 stack_depth.py [--max BYTES] code.txt literals.txt ROOT...
+#
+# With --max, exits 1 when any root's deepest path is larger (CI uses it).
 
 import re, sys
-dis, hexdump = sys.argv[1], sys.argv[2]
-roots = sys.argv[3:]
+args = sys.argv[1:]
+limit = None
+if args[:1] == ["--max"]:
+    limit, args = int(args[1]), args[2:]
+dis, hexdump = args[0], args[1]
+roots = args[2:]
 sys.setrecursionlimit(1000000)
 
 words = {}
@@ -112,11 +118,22 @@ def depth(c):
     memo[c] = (cframe[c] + best[0], (c,) + best[1])
     return memo[c]
 
+over = []
 for r in roots:
     n = next((f for f in funcs if f == r), None)
-    if not n: print("no", r); continue
+    if not n:
+        print("no", r)
+        over.append(r)
+        continue
     d, path = depth(comp[n])
     print(f"{r}: worst {d} B")
     for p in path[:16]:
         rec = " (recursive)" if len(members[p]) > 1 else ""
         print(f"   {cframe[p]:5d}  {p[:95]}{rec}")
+    if limit is not None and d > limit:
+        over.append(f"{r} ({d} B)")
+if limit is not None:
+    if over:
+        print(f"FAIL: over the {limit} B stack budget: {', '.join(over)}")
+        sys.exit(1)
+    print(f"ok: every path within {limit} B")

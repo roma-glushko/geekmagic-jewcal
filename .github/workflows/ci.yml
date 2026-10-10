@@ -1,0 +1,144 @@
+# CI: every push to main and every pull request runs the host checks and
+# builds both firmwares, so an update is tested before it reaches a device.
+# Each run keeps the installable packages as artifacts:
+# - jewcal-ultra: the zip with jewcal-ultra.bin, for a SmallTV Ultra's
+#   "Update firmware" page;
+# - jewcal-pro: the SmallTV Pro zip;
+# - gallery: every screen rendered by the simulator.
+#
+# CD: pushing a tag v* (e.g. `git tag v0.2.0 && git push origin v0.2.0`)
+# publishes a GitHub release with both zips.
+#
+# The jobs call the same make targets as a local checkout (see `make help`).
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  # The Xtensa Rust toolchain both firmwares are built and checked with.
+  ESP_TOOLCHAIN: 1.97.0.0
+  ESPFLASH_VERSION: v4.6.0
+
+jobs:
+  host:
+    name: Host checks and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Formatting, lints, tests (both canvas layouts), no_std builds
+        run: make check
+      - name: Render every screen
+        run: make gallery
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gallery
+          path: shots/
+          retention-days: 14
+
+  ultra:
+    name: SmallTV Ultra firmware
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: esp-rs/xtensa-toolchain@v1.7.0
+        with:
+          version: ${{ env.ESP_TOOLCHAIN }}
+          buildtargets: esp32
+          override: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install PlatformIO
+        run: pip install platformio
+      - uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: platformio-${{ runner.os }}-${{ hashFiles('ultra/platformio.ini') }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ultra/core
+      - name: Build, then check sizes, ROM helpers, static RAM and the stack budget
+        run: make ultra-check
+      - name: Package
+        run: make ultra-zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jewcal-ultra
+          path: dist/jewcal-ultra-*.zip
+          if-no-files-found: error
+
+  pro:
+    name: SmallTV Pro firmware
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: esp-rs/xtensa-toolchain@v1.7.0
+        with:
+          version: ${{ env.ESP_TOOLCHAIN }}
+          buildtargets: esp32
+          ldproxy: true
+          override: false
+      - name: Install espflash (packages the images)
+        run: |
+          curl -fsSL -o espflash.zip \
+            "https://github.com/esp-rs/espflash/releases/download/${ESPFLASH_VERSION}/espflash-x86_64-unknown-linux-musl.zip"
+          unzip -o espflash.zip -d "$HOME/.cargo/bin"
+          chmod +x "$HOME/.cargo/bin/espflash"
+          espflash --version
+      # ESP-IDF and its tools (~2 GB) are downloaded on the first build.
+      - uses: actions/cache@v4
+        with:
+          path: firmware/.embuild
+          key: esp-idf-${{ runner.os }}-${{ hashFiles('firmware/.cargo/config.toml', 'firmware/sdkconfig.defaults', 'firmware/Cargo.lock', 'firmware/components_esp32.lock') }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: firmware
+      - name: Clippy
+        run: make firmware-check
+      - name: Build and package
+        run: make zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jewcal-pro
+          path: dist/jewcal-pro-*.zip
+          if-no-files-found: error
+
+  release:
+    name: Publish the release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [host, ultra, pro]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: jewcal-*
+          merge-multiple: true
+          path: dist
+      - name: Create the GitHub release with both packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -l dist
+          gh release create "$GITHUB_REF_NAME" dist/*.zip \
+            --repo "$GITHUB_REPOSITORY" --title "JewCal $GITHUB_REF_NAME" --generate-notes

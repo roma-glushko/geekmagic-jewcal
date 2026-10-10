@@ -6,6 +6,8 @@
 #   make build        host crates + ESP32 firmware
 #   make firmware     ESP32 firmware only
 #   make test         host tests (calendar model + screens, both canvas layouts)
+#   make check        what CI checks on the host: formatting, lints, tests, no_std builds
+#   make firmware-check  clippy on the ESP32 firmware
 #   make gallery      render every screen to shots/index.html
 #   make flash        build, flash over USB, open the serial monitor
 #                     (the very first time, backs up the device's firmware)
@@ -21,6 +23,7 @@
 #   make ultra-zip    -> dist/jewcal-ultra-<version>-<commit>.zip
 #   make ultra-ota    upload the firmware to a running JewCal: make ultra-ota HOST=jewcal.local
 #   make ultra-stack  deepest stack use per entry point (the loop stack is 4 KB)
+#   make ultra-check  CI's checks on the images: sizes, ROM helpers, RAM, stack budget
 #
 # Options:
 #   FEATURES=backlight-gpio21   board variant (comma-separated cargo features)
@@ -31,7 +34,8 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := zip
 
 comma := ,
-ESP_ENV := source $(HOME)/export-esp.sh
+# The esp toolchain's environment (written by espup). CI exports it itself.
+ESP_ENV := { [ ! -f $(HOME)/export-esp.sh ] || . $(HOME)/export-esp.sh; }
 FW_DIR  := firmware
 ELF     := $(FW_DIR)/target/xtensa-esp32-espidf/release/jewcal
 VERSION := $(shell sed -n 's/^version *= *"\(.*\)"/\1/p' $(FW_DIR)/Cargo.toml | head -1)
@@ -59,15 +63,29 @@ ULTRA_NAME   := jewcal-ultra-$(ULTRA_VERSION)-$(COMMIT)
 ULTRA_PKG    := $(DIST)/$(ULTRA_NAME)
 HOST         ?= jewcal.local
 
-.PHONY: zip build firmware test gallery flash flash-full flash-app backup restore monitor clean help \
-	ultra ultra-zip ultra-ota ultra-stack
+.PHONY: zip build firmware test check firmware-check gallery flash flash-full flash-app backup restore monitor \
+	clean help ultra ultra-zip ultra-ota ultra-stack ultra-check
 
 help:
-	@sed -n '2,45p' Makefile | sed 's/^# \{0,1\}//'
+	@sed -n '2,49p' Makefile | sed 's/^# \{0,1\}//'
 
 test:
 	cargo test
 	cargo test -q -p jewcal-ui --features packed
+
+# Everything CI checks on the host. The firmware crates are formatted with the
+# host's rustfmt (they are outside the workspace).
+check:
+	cargo fmt --all --check
+	rustfmt --edition 2021 --check $(FW_DIR)/src/*.rs $(ULTRA_DIR)/core/src/*.rs
+	cargo clippy --all-targets -- -D warnings
+	$(MAKE) --no-print-directory test
+	cargo build -q -p jewcal-model --no-default-features
+	cargo build -q -p jewcal-ui --no-default-features --features packed
+	cargo build -q -p jewcal-app --no-default-features
+
+firmware-check:
+	$(ESP_ENV) && cd $(FW_DIR) && cargo clippy --release $(FEATURE_ARGS) -- -D warnings
 
 gallery:
 	cargo run -q -p jewcal-sim -- gallery --out shots
@@ -156,10 +174,23 @@ ultra-ota: ultra
 	@echo; echo "Uploaded; JewCal restarts in a few seconds."
 
 # Deepest stack use from the Arduino loop and each Rust entry point (4 KB budget).
+STACK_ROOTS := loop jc_frame jc_feed jc_finish jc_next_request jc_settings_page jc_form_apply
+XTENSA_BIN  = $(HOME)/.platformio/packages/toolchain-xtensa/bin
+define ultra_dump
+	$(XTENSA_BIN)/xtensa-lx106-elf-objdump -d -C --no-show-raw-insn $(ULTRA_BUILD)/jewcal/firmware.elf > $(ULTRA_BUILD)/jewcal/code.txt
+	$(XTENSA_BIN)/xtensa-lx106-elf-objdump -s -j .irom0.text -j .text -j .text1 $(ULTRA_BUILD)/jewcal/firmware.elf > $(ULTRA_BUILD)/jewcal/literals.txt
+endef
+
 ultra-stack: ultra
-	@T=$$(ls -d $(HOME)/.platformio/packages/toolchain-xtensa/bin); E=$(ULTRA_BUILD)/jewcal/firmware.elf; \
-	$$T/xtensa-lx106-elf-objdump -d -C --no-show-raw-insn $$E > $(ULTRA_BUILD)/jewcal/code.txt; \
-	$$T/xtensa-lx106-elf-objdump -s -j .irom0.text -j .text -j .text1 $$E > $(ULTRA_BUILD)/jewcal/literals.txt; \
-	python3 $(ULTRA_DIR)/scripts/stack_depth.py $(ULTRA_BUILD)/jewcal/code.txt $(ULTRA_BUILD)/jewcal/literals.txt \
-	  loop jc_frame jc_feed jc_finish jc_next_request jc_settings_page jc_form_apply | grep -E 'worst|^ +[0-9]' | \
-	  awk '/worst/ {print; n=0; next} {if (++n <= 4) print}' 
+	@$(ultra_dump)
+	@python3 $(ULTRA_DIR)/scripts/stack_depth.py $(ULTRA_BUILD)/jewcal/code.txt $(ULTRA_BUILD)/jewcal/literals.txt \
+	  $(STACK_ROOTS) | grep -E 'worst|^ +[0-9]' | awk '/worst/ {print; n=0; next} {if (++n <= 4) print}'
+
+# The Ultra's hard limits, checked on the built images (CI runs this). The
+# 3 KB stack budget leaves ~1 KB of the 4 KB for interrupt frames and the
+# lwIP calls behind the page sink, which the static analysis cannot see.
+ultra-check: ultra
+	python3 $(ULTRA_DIR)/scripts/check_image.py $(ULTRA_BUILD) $(XTENSA_BIN)
+	@$(ultra_dump)
+	@python3 $(ULTRA_DIR)/scripts/stack_depth.py --max 3072 $(ULTRA_BUILD)/jewcal/code.txt \
+	  $(ULTRA_BUILD)/jewcal/literals.txt $(STACK_ROOTS) | grep -E 'worst|ok:|FAIL'

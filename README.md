@@ -1,5 +1,7 @@
 # JewCal: a pixel-art Jewish calendar for the GeekMagic SmallTV
 
+[![CI](https://github.com/roma-glushko/geekmagic-jewcal/actions/workflows/ci.yml/badge.svg)](https://github.com/roma-glushko/geekmagic-jewcal/actions/workflows/ci.yml)
+
 Firmware for the **GeekMagic SmallTV Pro** (ESP32) and the **SmallTV Ultra** (ESP8266), both with a 240×240
 display, that shows what is coming up in the Jewish calendar for your city:
 - Shabbat and Yom Tov, with candle-lighting and havdalah times;
@@ -327,9 +329,11 @@ On the Ultra, the Rust core is linked into the Arduino firmware:
 
 ```bash
 make help                                           # all make targets
+make check                                          # what CI checks: formatting, lints, tests, no_std builds
 make test                                           # cargo test, plus the UI with the Ultra's 4-bit canvas
 make ultra                                          # build the SmallTV Ultra images
 make ultra-stack                                    # deepest stack use per entry point (4 KB budget)
+make ultra-check                                    # the Ultra's limits: image sizes, ROM helpers, RAM, stack
 cargo test                                          # host tests: model + ui, against recorded data
 cargo run -p jewcal-sim -- agenda nyc 2027-04-21T12:00   # what the model sees at a local time
 cargo run -p jewcal-sim -- render jerusalem 2027-10-19T12:00 sukkot --out shots
@@ -353,6 +357,25 @@ The tests cover:
   - The seasons, turning at sunset, and the Omer's sefirot.
 - **Title fit:** every title Hebcal produced in five years must fit its slot on screen.
 - **Render sweep:** all screens draw for every few hours across three years, with every weather condition and unit system.
+
+### Continuous integration
+
+[GitHub Actions](.github/workflows/ci.yml) runs on every push to `main` and every pull request:
+- **Host:** `make check` (formatting, clippy, the tests with both canvas layouts, the `no_std` builds), then the
+  screen gallery.
+- **SmallTV Ultra:** builds both images, then `make ultra-check`, which fails the run if:
+  - the installer no longer fits the stock updater;
+  - a ROM division helper ends up in flash;
+  - static RAM grows past 35 KB;
+  - any code path from the main loop needs more than 3 KB of the 4 KB stack.
+- **SmallTV Pro:** clippy, then builds and packages the ESP32 firmware.
+
+Each run keeps its packages as downloadable artifacts. To try a change on a SmallTV Ultra before merging it, open the
+run, download **jewcal-ultra**, and upload the `jewcal-ultra.bin` inside it through **Update firmware**. **gallery**
+holds every screen as the change draws it.
+
+Releases: push a tag such as `git tag v0.2.0 && git push origin v0.2.0`. CI then publishes a GitHub release with
+both zips, once every check has passed.
 
 ## Troubleshooting
 
