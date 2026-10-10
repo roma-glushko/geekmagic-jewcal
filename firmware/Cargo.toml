@@ -2,6 +2,7 @@
 name = "jewcal"
 version = "0.1.0"
 edition = "2021"
+license = "Apache-2.0"
 resolver = "2"
 description = "Pixel-art Jewish calendar firmware for the GeekMagic SmallTV Pro"
 

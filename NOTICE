@@ -1,0 +1,18 @@
+JewCal
+Copyright 2026 Roman Hlushko
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This project includes or uses third-party material:
+
+* Calendar data from Hebcal.com (https://www.hebcal.com), licensed under
+  CC BY 4.0. The test fixtures in model/tests/fixtures/events-*.json and
+  zmanim-*.json are responses recorded from its API.
+* Weather data from Open-Meteo.com (https://open-meteo.com), licensed under
+  CC BY 4.0. The test fixtures in model/tests/fixtures/weather-*.json are
+  responses recorded from its API.
+* The Sweetie 16 palette by GrafxKid (https://lospec.com/palette-list/sweetie-16).
+* Parts of the SmallTV Pro firmware (firmware/: the ST7789 driver skeleton,
+  the HTTP client wrapper and the web form helpers, some of which are now in
+  app/src/web.rs) were adapted from GeekMagic-Clawdmeter by MyrikLD
+  (https://github.com/MyrikLD/GeekMagic-Clawdmeter).

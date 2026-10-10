@@ -2,6 +2,7 @@
 name = "jewcal-sim"
 version = "0.1.0"
 edition = "2021"
+license = "Apache-2.0"
 description = "Host tools for JewCal: record Hebcal fixtures, generate the tz table, render screens to PNG"
 publish = false
 

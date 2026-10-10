@@ -376,7 +376,11 @@ The tests cover:
 - Calendar data: [Hebcal.com](https://www.hebcal.com), CC BY 4.0.
 - Weather data: [Open-Meteo.com](https://open-meteo.com), CC BY 4.0.
 - Palette: [Sweetie 16](https://lospec.com/palette-list/sweetie-16) by GrafxKid.
-- Display and HTTPS groundwork: [GeekMagic-Clawdmeter](https://github.com/HermannBjorgvin/Clawdmeter)-style Rust firmware for the same board.
+- Display and HTTPS groundwork for the SmallTV Pro: [GeekMagic-Clawdmeter](https://github.com/MyrikLD/GeekMagic-Clawdmeter), Rust firmware for the same board.
 - SmallTV Ultra pin map and the two-step install: [smalltv-mod](https://github.com/giovi321/smalltv-mod) and [ESPHome's device page](https://devices.esphome.io/devices/geekmagic-ultra/).
 
 Times are as published by Hebcal for the chosen location; follow your community's customs.
+
+## License
+
+[Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for the third-party data and code it includes.
