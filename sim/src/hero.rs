@@ -1,8 +1,8 @@
-//! The overview page's picture: a SmallTV drawn in the device's palette.
-//! Its screen cycles through a few real screens, with the flames flickering
-//! and the device's own dissolve between screens. It is an animated PNG at
-//! one image pixel per art pixel, and the page scales it up without
-//! smoothing.
+//! The SmallTV picture on the user guide's overview and in the README: a
+//! SmallTV drawn in the device's palette. Its screen cycles through a few
+//! real screens, with the flames flickering and the device's own dissolve
+//! between screens. It is an animated PNG in which, after the first frame,
+//! only the rectangle that changed is stored.
 
 use std::fs::File;
 use std::io::BufWriter;
@@ -16,6 +16,8 @@ use jewcal_ui::{draw, Ctx, Screen};
 use crate::{cases, fixtures, png_out};
 
 type Res = Result<(), Box<dyn std::error::Error>>;
+/// A whole picture at one image pixel per art pixel, and how long it shows (ms).
+pub type Frame = (Vec<u8>, u32);
 
 /// The tour: a gallery case, its screen, and how long it stays (ms).
 const TOUR: [(&str, Screen, u32); 5] = [
@@ -55,10 +57,10 @@ const FY: i32 = PAD + TOP;
 const SX: i32 = FX + RIM + BEZEL;
 const SY: i32 = FY + RIM + BEZEL;
 
-pub fn write(path: &Path, preview: &Path) -> Res {
+/// Every frame of the tour. Identical neighbours merge.
+pub fn frames() -> Result<Vec<Frame>, Box<dyn std::error::Error>> {
     let case = smalltv();
-    // Every frame as a whole picture, with how long it shows.
-    let mut frames: Vec<(Vec<u8>, u32)> = Vec::new();
+    let mut frames: Vec<Frame> = Vec::new();
     let mut push = |px: Vec<u8>, ms: u32| match frames.last_mut() {
         Some((last, d)) if *last == px => *d += ms,
         _ => frames.push((px, ms)),
@@ -75,53 +77,61 @@ pub fn write(path: &Path, preview: &Path) -> Res {
             push(with_screen(&case, &c), DISSOLVE_MS);
         }
     }
+    Ok(frames)
+}
 
+/// The animation with each art pixel drawn `scale`×`scale`. The user guide
+/// takes 1 and scales it up without smoothing; GitHub would smooth it, so the
+/// README takes a larger one.
+pub fn write(path: &Path, frames: &[Frame], scale: u32) -> Res {
+    let s = scale as i32;
     let mut plte = Vec::new();
     for rgb in SWEETIE16.iter().chain(&EXTRA) {
         plte.extend([(rgb >> 16) as u8, (rgb >> 8) as u8, *rgb as u8]);
     }
     let mut trns = vec![255u8; CLEAR as usize + 1];
     trns[CLEAR as usize] = 0;
-    let mut enc = png::Encoder::new(BufWriter::new(File::create(path)?), W as u32, H as u32);
+    let mut enc = png::Encoder::new(BufWriter::new(File::create(path)?), (W * s) as u32, (H * s) as u32);
     enc.set_color(png::ColorType::Indexed);
     enc.set_depth(png::BitDepth::Eight);
-    enc.set_palette(plte.clone());
-    enc.set_trns(trns.clone());
+    enc.set_palette(plte);
+    enc.set_trns(trns);
     enc.set_compression(png::Compression::Best);
+    if scale > 1 {
+        // Scaled up, rows repeat the one above and pixels their neighbour:
+        // choosing the filter per row ("Up", "Sub") makes both nearly free.
+        enc.set_adaptive_filter(png::AdaptiveFilterType::Adaptive);
+    }
     enc.set_animated(frames.len() as u32, 0)?;
     let mut wr = enc.write_header()?;
     let mut prev: Option<&[u8]> = None;
-    for (px, ms) in &frames {
+    for (px, ms) in frames {
         // After the first frame, only the rectangle that changed.
         let (x, y, w, h) = prev.map_or((0, 0, W, H), |p| changed(p, px));
         wr.reset_frame_position()?;
-        wr.set_frame_dimension(w as u32, h as u32)?;
-        wr.set_frame_position(x as u32, y as u32)?;
+        wr.set_frame_dimension((w * s) as u32, (h * s) as u32)?;
+        wr.set_frame_position((x * s) as u32, (y * s) as u32)?;
         wr.set_frame_delay(*ms as u16, 1000)?;
         wr.set_dispose_op(png::DisposeOp::None)?;
         wr.set_blend_op(png::BlendOp::Source)?;
-        let rect: Vec<u8> =
-            (y..y + h).flat_map(|r| &px[(r * W + x) as usize..(r * W + x + w) as usize]).copied().collect();
+        let rect: Vec<u8> = (y * s..(y + h) * s)
+            .flat_map(|r| (x * s..(x + w) * s).map(move |c| px[((r / s) * W + c / s) as usize]))
+            .collect();
         wr.write_image_data(&rect)?;
         prev = Some(px);
     }
     wr.finish()?;
     let total: u32 = frames.iter().map(|f| f.1).sum();
-    println!("wrote {} ({W}x{H}, {} frames, {:.1} s)", path.display(), frames.len(), total as f32 / 1000.0);
-
-    // A still at 3x, for reviewing the art.
-    const S: i32 = 3;
-    let first = &frames[0].0;
-    let mut big = Vec::with_capacity((W * H * S * S) as usize);
-    for y in 0..H * S {
-        big.extend((0..W * S).map(|x| first[((y / S) * W + x / S) as usize]));
-    }
-    let mut enc = png::Encoder::new(BufWriter::new(File::create(preview)?), (W * S) as u32, (H * S) as u32);
-    enc.set_color(png::ColorType::Indexed);
-    enc.set_depth(png::BitDepth::Eight);
-    enc.set_palette(plte);
-    enc.set_trns(trns);
-    enc.write_header()?.write_image_data(&big)?;
+    let bytes = std::fs::metadata(path)?.len();
+    println!(
+        "wrote {} ({}x{}, {} frames, {:.1} s, {} KB)",
+        path.display(),
+        W * s,
+        H * s,
+        frames.len(),
+        total as f32 / 1000.0,
+        bytes / 1024
+    );
     Ok(())
 }
 

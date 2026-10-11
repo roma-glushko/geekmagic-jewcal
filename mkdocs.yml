@@ -11,6 +11,7 @@ copyright: >-
 
 exclude_docs: |
   requirements.txt
+  assets/smalltv-6x.png
 
 nav:
   - Overview: index.md

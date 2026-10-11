@@ -4,6 +4,10 @@
 [![Docs](https://readthedocs.org/projects/geekmagic-jewcal/badge/?version=latest)](https://geekmagic-jewcal.readthedocs.io/)
 [![SmallTV Ultra: tested on a real device](https://img.shields.io/badge/SmallTV_Ultra-tested_on_a_real_device-38b764)](https://geekmagic-jewcal.readthedocs.io/en/latest/install-ultra/)
 
+<p align="center">
+  <img src="docs/assets/smalltv-6x.png" width="438" alt="A SmallTV running JewCal. Its screen cycles through the main screen before Shabbat, a three-day Yom Tov evening by evening, Pesach, Chanukah and the weather.">
+</p>
+
 Firmware for the **[GeekMagic SmallTV Ultra](https://geekmagic.cc/products/smalltv-ultra/)** (ESP8266) and
 **[SmallTV Pro](https://geekmagic.cc/products/smalltv-pro/)** (ESP32) that shows, for your city:
 - Shabbat and Yom Tov with candle-lighting and havdalah times; stacked days are spelled out evening by evening;
@@ -12,10 +16,6 @@ Firmware for the **[GeekMagic SmallTV Ultra](https://geekmagic.cc/products/small
 - a screen for each holiday, and the weather.
 
 Times come from [Hebcal.com](https://www.hebcal.com). Settings are at `http://jewcal.local/`.
-
-| Main screen | A 3-day chag, evening by evening | A holiday screen |
-|---|---|---|
-| ![main](docs/screens/today-friday-main.png) | ![period](docs/screens/erev-pesach-3day-period.png) | ![pesach](docs/screens/pesach-2nd-night-pesach.png) |
 
 **📖 [User guide](https://geekmagic-jewcal.readthedocs.io/):** installation, every screen, every setting,
 troubleshooting.

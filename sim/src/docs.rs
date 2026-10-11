@@ -32,7 +32,10 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
     write_pages(&out)?;
     write_logo(Path::new("docs/assets/logo.png"))?;
     crate::webfont::write(Path::new("docs/assets/fonts/jewcal-pixel.ttf"))?;
-    crate::hero::write(Path::new("docs/assets/smalltv.png"), &out.join("smalltv-3x.png"))?;
+    let tv = crate::hero::frames()?;
+    crate::hero::write(Path::new("docs/assets/smalltv.png"), &tv, 1)?;
+    // Shown 3:1 in the README: whole pixels on screens of 1x and 2x density.
+    crate::hero::write(Path::new("docs/assets/smalltv-6x.png"), &tv, 6)?;
     println!("wrote {}/settings.html and setup.html", out.display());
     if let Some(chrome) = chrome {
         std::fs::create_dir_all(&images)?;

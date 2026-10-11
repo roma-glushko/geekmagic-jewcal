@@ -35,7 +35,7 @@ make firmware-check                          # clippy on the Pro firmware (CI de
 cargo test -p jewcal-ui --features packed    # the UI with the Ultra's 4-bit canvas (part of `make test`)
 cargo run -p jewcal-sim -- gen-cfont         # regenerate ultra/src/font_body.h after changing the BODY font
 make docs / make docs-serve                  # the user guide (docs/, mkdocs.yml; Read the Docs builds .readthedocs.yaml)
-make docs-assets                             # regenerate docs/assets (logo, pixel font, animated SmallTV) and docs/images (pages, headless Chrome)
+make docs-assets                             # regenerate docs/assets (logo, pixel font, animated SmallTV: 1x for the docs, 6x for the README) and docs/images (pages, headless Chrome)
 ```
 
 The esp toolchain env is not inherited by tool shells: always `source ~/export-esp.sh` in the same `bash -c`.
