@@ -53,6 +53,10 @@ def frame(ins):
         if m and num(m.group(2)) < 0: return -num(m.group(2))
         m = re.match(r"movi(?:\.n)?\s+a(\d+), (-?(?:0x)?[0-9a-f]+)$", i)
         if m: regs[m.group(1)] = num(m.group(2)); continue
+        # Frames past movi's ±2 KB: `movi a8, 208; addmi a8, a8, -4352` is
+        # 4144 B (core's driftsort_main, which once overflowed the loop stack).
+        m = re.match(r"addmi\s+a(\d+), a(\d+), (-?(?:0x)?[0-9a-f]+)$", i)
+        if m and m.group(2) in regs: regs[m.group(1)] = regs[m.group(2)] + num(m.group(3)); continue
         m = re.match(r"(?:add|sub)(?:\.n)?\s+a(\d+), a1, a(\d+)", i)
         if m and m.group(2) in regs: return abs(regs[m.group(2)])
     return 0

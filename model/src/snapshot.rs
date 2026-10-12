@@ -475,7 +475,7 @@ fn holiday_views(model: &CalendarModel, today: CivilDate) -> Vec<HolidayView<'_>
         let av1 = HDate { year, month: AV, day: 1 }.to_civil();
         push(Holiday::TishaBav, f.date, f.date, av1, Some(f), Vec::new());
     }
-    out.sort_by_key(|h| h.first);
+    crate::sort_by_key(&mut out, |h| h.first);
     out
 }
 

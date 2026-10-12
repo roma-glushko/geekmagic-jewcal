@@ -130,6 +130,12 @@ Keep the Makefile targets and the workflow in step. Our C++ is built with `-Wall
     are boxed and finished in place (`take()`).
   - Check with `make ultra-stack` (deepest static path ~2.6 KB from `loop()`, plus ~0.8 KB of lwIP behind the page
     sink and the interrupt frames). The settings page shows `ESP.getFreeContStack()`.
+  - **No `slice::sort*` in `model`, `ui` or `app`.** Use `crate::sort_by_key` (stable, in place).
+    - Core's stable sort (driftsort) has a 4144 B frame, larger than the whole loop stack. From 21 to 64 items it
+      also fills that frame as scratch, which smashes the guard words: "crash: reset 253", then safe mode.
+    - `sort_unstable` keeps up to 4 KB of stack too.
+    - This hit on 2026-10-12 (1 Cheshvan): the fetch window stopped reaching back into Tishrei and shrank from ~90
+      items to ~60.
 - **Ultra linking:** `scripts/rust_core.py` moves the core's code and constants into flash.
   - The archive members are renamed to `*.c.o`, so the Arduino linker script maps their code to flash.
   - `.rodata*` is renamed to `.irom0.pstr*`.

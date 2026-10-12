@@ -210,8 +210,8 @@ impl CalendarModel {
         fetched_at: i64,
     ) -> Self {
         let mut items = events.items;
-        items.sort_by_key(|i| (i.date, i.at.map(|s| s.utc)));
-        sun.sort_by_key(|s| s.date);
+        crate::sort_by_key(&mut items, |i| (i.date, i.at.map(|s| s.utc)));
+        crate::sort_by_key(&mut sun, |s| s.date);
         let periods = build_periods(&items, window);
         let fasts = build_fasts(&items);
         let spans = build_spans(&items);

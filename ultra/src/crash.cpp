@@ -90,21 +90,32 @@ extern "C" void IRAM_ATTR custom_crash_callback(struct rst_info *ri, uint32_t, u
     uint32_t w[sizeof(State::last) / 4];
   } m;
   for (uint32_t i = 0; i < sizeof m.w / 4; i++) m.w[i] = 0;
-  // "crash: reset 2, exception 28, at 0x4020abcd" (decode with addr2line).
-  // No calls out of IRAM: plain loops, and ROM division.
+  // The core's own resets (core_esp8266_postmortem.cpp) carry no exception
+  // or address, so they get a name. 253 is its check of the guard words
+  // around the 4 KB loop stack, after every loop(); 254 is abort(), panic()
+  // or a failed `new`.
+  const char *named = ri->reason == 253   ? "crash: loop stack overflow (reset 253)"
+                      : ri->reason == 254 ? "crash: abort or panic (reset 254)"
+                                          : nullptr;
+  // Otherwise "crash: reset 2, exception 28, at 0x4020abcd" (decode with
+  // addr2line). No calls out of IRAM: plain loops, and ROM division.
   uint32_t n = 0;
-  for (const char *p = "crash: reset "; *p;) m.c[n++] = *p++;
-  for (uint32_t v = ri->reason % 1000, div = 100, lead = 1; div; div /= 10) {
-    const uint32_t d = v / div % 10;
-    if (d || !lead || div == 1) m.c[n++] = '0' + d, lead = 0;
+  if (named) {
+    for (const char *p = named; *p;) m.c[n++] = *p++;
+  } else {
+    for (const char *p = "crash: reset "; *p;) m.c[n++] = *p++;
+    for (uint32_t v = ri->reason % 1000, div = 100, lead = 1; div; div /= 10) {
+      const uint32_t d = v / div % 10;
+      if (d || !lead || div == 1) m.c[n++] = '0' + d, lead = 0;
+    }
+    for (const char *p = ", exception "; *p;) m.c[n++] = *p++;
+    for (uint32_t v = ri->exccause % 1000, div = 100, lead = 1; div; div /= 10) {
+      const uint32_t d = v / div % 10;
+      if (d || !lead || div == 1) m.c[n++] = '0' + d, lead = 0;
+    }
+    for (const char *p = ", at 0x"; *p;) m.c[n++] = *p++;
+    for (int shift = 28; shift >= 0; shift -= 4) m.c[n++] = "0123456789abcdef"[(ri->epc1 >> shift) & 15];
   }
-  for (const char *p = ", exception "; *p;) m.c[n++] = *p++;
-  for (uint32_t v = ri->exccause % 1000, div = 100, lead = 1; div; div /= 10) {
-    const uint32_t d = v / div % 10;
-    if (d || !lead || div == 1) m.c[n++] = '0' + d, lead = 0;
-  }
-  for (const char *p = ", at 0x"; *p;) m.c[n++] = *p++;
-  for (int shift = 28; shift >= 0; shift -= 4) m.c[n++] = "0123456789abcdef"[(ri->epc1 >> shift) & 15];
   for (uint32_t i = 0; i < sizeof m.w / 4; i++) rtc[3 + i] = m.w[i];
   rtc[2] = 1;  // panicked: count it as a crash
 }
